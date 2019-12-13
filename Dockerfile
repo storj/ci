@@ -89,6 +89,16 @@ RUN go get github.com/mfridman/tparse
 RUN go get github.com/axw/gocov/gocov
 RUN go get github.com/AlekSi/gocov-xml
 
+# Tools in this repository
+
+COPY go.mod go.mod
+COPY go.sum go.sum
+
+# TODO:
+#  install directly from this repository rather than pulling
+#  this requires a separate folder setup to not clash with other things.
+RUN go get github.com/storj/ci/...
+
 # Set our entrypoint to close after 28 minutes, and forcefully close at 30 minutes.
 # This is to prevent Jenkins collecting cats.
 ENTRYPOINT ["timeout", "-k30m", "28m"]
