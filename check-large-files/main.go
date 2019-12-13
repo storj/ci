@@ -1,16 +1,12 @@
 // Copyright (C) 2019 Storj Labs, Inc.
 // See LICENSE for copying information.
 
-// +build ignore
-
 package main
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"storj.io/storj/private/memory"
 )
 
 var ignoreFolder = map[string]bool{
@@ -21,8 +17,14 @@ var ignoreFolder = map[string]bool{
 	"dist":         true,
 }
 
+// Size constants
+const (
+	KB = 1 << 10
+	MB = 1 << 20
+)
+
 func main() {
-	const fileSizeLimit = 650 * memory.KB
+	const fileSizeLimit = 650 * KB
 
 	var failed int
 
@@ -35,10 +37,10 @@ func main() {
 			return filepath.SkipDir
 		}
 
-		size := memory.Size(info.Size())
+		size := info.Size()
 		if size > fileSizeLimit {
 			failed++
-			fmt.Printf("%v (%v)\n", path, size)
+			fmt.Printf("%v (%vKB)\n", path, size/KB)
 		}
 
 		return nil
