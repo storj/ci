@@ -15,11 +15,13 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// IgnorePackages is a list of packages that are allowed to have bad-imports.
 var IgnorePackages = []string{
 	// Currently overlay contains NodeDossier which is used in multiple places.
 	"storj.io/storj/satellite/overlay",
 }
 
+// Libraries contains the list of packages to verify against.
 var Libraries = []string{
 	"storj.io/storj/pkg/...",
 	"storj.io/storj/lib/...",
@@ -28,6 +30,7 @@ var Libraries = []string{
 	"storj.io/storj/storage/...",
 }
 
+// Peers contains the list of peer pacakges.
 var Peers = []string{
 	"storj.io/storj/satellite/...",
 	"storj.io/storj/storagenode/...",
@@ -36,6 +39,7 @@ var Peers = []string{
 	"storj.io/storj/certificate/...",
 }
 
+// Cmds contains the list of command packages.
 var Cmds = []string{
 	"storj.io/storj/cmd/...",
 }
