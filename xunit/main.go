@@ -57,7 +57,7 @@ func main() {
 
 	_, _ = output.Write([]byte(xml.Header))
 
-	encoder := xml.NewEncoder(output)
+	encoder := &printingEncoder{xml.NewEncoder(output)}
 	encoder.Indent("", "\t")
 	defer encoder.Flush()
 
@@ -84,12 +84,12 @@ func main() {
 			encoder.EncodeToken(xml.StartElement{
 				Name: xml.Name{Local: "testsuite"},
 				Attr: []xml.Attr{
-					{xml.Name{Local: "name"}, pkg.Summary.Package},
-					{xml.Name{Local: "time"}, fmt.Sprintf("%.2f", pkg.Summary.Elapsed)},
+					{Name: xml.Name{Local: "name"}, Value: pkg.Summary.Package},
+					{Name: xml.Name{Local: "time"}, Value: fmt.Sprintf("%.2f", pkg.Summary.Elapsed)},
 
-					{xml.Name{Local: "tests"}, strconv.Itoa(len(all))},
-					{xml.Name{Local: "failures"}, strconv.Itoa(len(failed))},
-					{xml.Name{Local: "skips"}, strconv.Itoa(len(skipped))},
+					{Name: xml.Name{Local: "tests"}, Value: strconv.Itoa(len(all))},
+					{Name: xml.Name{Local: "failures"}, Value: strconv.Itoa(len(failed))},
+					{Name: xml.Name{Local: "skips"}, Value: strconv.Itoa(len(skipped))},
 				},
 			})
 			defer encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "testsuite"}})
@@ -98,8 +98,8 @@ func main() {
 				encoder.EncodeToken(xml.StartElement{
 					Name: xml.Name{Local: "testcase"},
 					Attr: []xml.Attr{
-						{xml.Name{Local: "classname"}, pkg.Summary.Package},
-						{xml.Name{Local: "name"}, "Panic"},
+						{Name: xml.Name{Local: "classname"}, Value: pkg.Summary.Package},
+						{Name: xml.Name{Local: "name"}, Value: "Panic"},
 					},
 				})
 				encoder.EncodeToken(xml.StartElement{Name: xml.Name{Local: "failure"}, Attr: nil})
@@ -115,23 +115,23 @@ func main() {
 					encoder.EncodeToken(xml.StartElement{
 						Name: xml.Name{Local: "testcase"},
 						Attr: []xml.Attr{
-							{xml.Name{Local: "classname"}, t.Package},
-							{xml.Name{Local: "name"}, t.Name},
-							{xml.Name{Local: "time"}, fmt.Sprintf("%.2f", t.Elapsed())},
+							{Name: xml.Name{Local: "classname"}, Value: t.Package},
+							{Name: xml.Name{Local: "name"}, Value: t.Name},
+							{Name: xml.Name{Local: "time"}, Value: fmt.Sprintf("%.2f", t.Elapsed())},
 						},
 					})
 					defer encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "testcase"}})
 
-					encoder.EncodeToken(xml.StartElement{xml.Name{Local: "system-out"}, nil})
+					encoder.EncodeToken(xml.StartElement{Name: xml.Name{Local: "system-out"}})
 					encoder.EncodeToken(xml.CharData(eventOutput(t.Events)))
-					encoder.EncodeToken(xml.EndElement{xml.Name{Local: "system-out"}})
+					encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "system-out"}})
 
 					switch TestStatus(t) {
 					case parse.ActionSkip:
 						encoder.EncodeToken(xml.StartElement{
 							Name: xml.Name{Local: "skipped"},
 							Attr: []xml.Attr{
-								{xml.Name{Local: "message"}, t.Stack()},
+								{Name: xml.Name{Local: "message"}, Value: t.Stack()},
 							},
 						})
 						encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "skipped"}})
@@ -143,6 +143,24 @@ func main() {
 				}()
 			}
 		}()
+	}
+}
+
+type printingEncoder struct {
+	*xml.Encoder
+}
+
+func (encoder *printingEncoder) EncodeToken(token xml.Token) {
+	err := encoder.Encoder.EncodeToken(token)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "encoder: failed encoding %v: %v\n", token, err)
+	}
+}
+
+func (encoder *printingEncoder) Flush() {
+	err := encoder.Encoder.Flush()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "encoder: failed to flush: %v\n", err)
 	}
 }
 
@@ -165,6 +183,8 @@ func withoutEmptyName(tests []*parse.Test) []*parse.Test {
 }
 
 // Code based on: https://github.com/mfridman/tparse/blob/master/parse/process.go#L27
+
+// ProcessWithEcho processes go test -json output and echos the usual output to stdout.
 func ProcessWithEcho(r io.Reader) (parse.Packages, error) {
 	pkgs := parse.Packages{}
 
@@ -276,6 +296,7 @@ func ProcessWithEcho(r io.Reader) (parse.Packages, error) {
 	return pkgs, nil
 }
 
+// Discard checks whether the event should be ignored.
 func Discard(e *parse.Event) bool {
 	for i := range updates {
 		if strings.HasPrefix(e.Output, updates[i]) {
@@ -293,7 +314,7 @@ var (
 	}
 )
 
-// Status reports the outcome of the test represented as a single Action: pass, fail or skip.
+// TestStatus reports the outcome of the test represented as a single Action: pass, fail or skip.
 //
 // Custom status to check packages properly.
 func TestStatus(t *parse.Test) parse.Action {
