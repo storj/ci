@@ -314,13 +314,13 @@ func diff(b1, b2 []byte) (data []byte, err error) {
 	if err != nil {
 		return
 	}
-	defer os.Remove(f1)
+	defer func() { _ = os.Remove(f1) }()
 
 	f2, err := writeTempFile("protobuf-diff", b2)
 	if err != nil {
 		return
 	}
-	defer os.Remove(f2)
+	defer func() { _ = os.Remove(f2) }()
 
 	data, err = exec.Command("diff", "-u", f1, f2).CombinedOutput()
 	if len(data) > 0 {
@@ -341,7 +341,7 @@ func writeTempFile(prefix string, data []byte) (string, error) {
 		err = err1
 	}
 	if err != nil {
-		os.Remove(file.Name())
+		_ = os.Remove(file.Name())
 		return "", err
 	}
 	return file.Name(), nil
