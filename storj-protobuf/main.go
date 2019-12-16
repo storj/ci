@@ -12,7 +12,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 )
@@ -86,21 +85,6 @@ func installGoBin() error {
 		fmt.Println(string(out))
 	}
 	return err
-}
-
-func versionOf(dep string) (string, error) {
-	moddata, err := ioutil.ReadFile("go.mod")
-	if err != nil {
-		return "", err
-	}
-
-	rxMatch := regexp.MustCompile(regexp.QuoteMeta(dep) + `\s+(.*)\n`)
-	matches := rxMatch.FindAllStringSubmatch(string(moddata), 1)
-	if len(matches) == 0 {
-		return "", errors.New("go.mod missing github.com/gogo/protobuf entry")
-	}
-
-	return matches[0][1], nil
 }
 
 func install(deps ...string) error {

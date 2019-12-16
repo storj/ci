@@ -20,7 +20,6 @@ var ignoreFolder = map[string]bool{
 // Size constants
 const (
 	KB = 1 << 10
-	MB = 1 << 20
 )
 
 func main() {

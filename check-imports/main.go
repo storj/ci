@@ -45,7 +45,7 @@ func main() {
 	}
 
 	roots, err := packages.Load(&packages.Config{
-		Mode:       packages.LoadAllSyntax,
+		Mode:       packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports,
 		Env:        os.Environ(),
 		BuildFlags: buildFlags,
 		Tests:      true,
