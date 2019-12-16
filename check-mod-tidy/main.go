@@ -37,7 +37,10 @@ func main() {
 	err = os.Chdir(tempdir)
 	checkf(err, "failed to change directory: %v\n", err)
 
-	defer os.Chdir(workingDir)
+	defer func() {
+		err = os.Chdir(workingDir)
+		checkf(err, "failed to change directory: %v\n", err)
+	}()
 
 	original, err := ioutil.ReadFile(*modfile)
 	checkf(err, "failed to read %q: %v\n", *modfile, err)

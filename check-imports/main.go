@@ -119,7 +119,7 @@ func main() {
 func verifyPackage(stderr io.Writer, pkg *packages.Package) (misgrouped, unsorted []Imports) {
 	// ignore generated test binaries
 	if strings.HasSuffix(pkg.ID, ".test") {
-		return
+		return nil, nil
 	}
 
 	for i, file := range pkg.Syntax {
@@ -153,7 +153,7 @@ func verifyPackage(stderr io.Writer, pkg *packages.Package) (misgrouped, unsorte
 		}
 	}
 
-	return
+	return misgrouped, unsorted
 }
 
 // Imports defines all imports for a single file.
@@ -163,7 +163,7 @@ type Imports struct {
 	Decls     []ImportDecl
 }
 
-// Classes returns all import groupings
+// Classes returns all import groupings.
 func (imports Imports) Classes() [][]Class {
 	var classes [][]Class
 	for _, decl := range imports.Decls {
@@ -172,10 +172,10 @@ func (imports Imports) Classes() [][]Class {
 	return classes
 }
 
-// ImportDecl defines a single import declaration
+// ImportDecl defines a single import declaration.
 type ImportDecl []ImportGroup
 
-// allowedGroups lists all valid groupings
+// allowedGroups lists all valid groupings.
 var allowedGroups = [][]Class{
 	{Standard},
 	{Storj},
@@ -198,10 +198,10 @@ func (decls ImportDecl) IsGrouped() bool {
 }
 
 // Classes returns each group class.
-func (decl ImportDecl) Classes() []Class {
-	classes := make([]Class, len(decl))
+func (decls ImportDecl) Classes() []Class {
+	classes := make([]Class, len(decls))
 	for i := range classes {
-		classes[i] = decl[i].Class()
+		classes[i] = decls[i].Class()
 	}
 	return classes
 }

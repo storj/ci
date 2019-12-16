@@ -36,7 +36,7 @@ func main() {
 
 		_, writeErr := os.Stdout.Write(buffer[start:end])
 		if writeErr != nil {
-			os.Stderr.Write([]byte(writeErr.Error()))
+			_, _ = os.Stderr.Write([]byte(writeErr.Error()))
 			os.Exit(2)
 		}
 
@@ -60,7 +60,7 @@ func main() {
 
 	_, _ = io.Copy(os.Stdout, os.Stdin)
 	if problemDetected {
-		os.Stderr.Write([]byte("\nTest failed due to data race or panic.\n"))
+		_, _ = os.Stderr.Write([]byte("\nTest failed due to data race or panic.\n"))
 		os.Exit(1)
 	}
 }

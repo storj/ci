@@ -16,6 +16,7 @@ import (
 
 func main() { singlechecker.Main(Analyzer) }
 
+// Analyzer verifies whether errs package is properly used.
 var Analyzer = &analysis.Analyzer{
 	Name: "errs",
 	Doc:  "check for proper usage of errs package",
@@ -69,6 +70,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
+// IsConcatString returns whether arg is a basic string expression.
 func IsConcatString(arg ast.Expr) bool {
 	switch arg := arg.(type) {
 	case *ast.BasicLit:
