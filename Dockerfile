@@ -76,28 +76,25 @@ RUN yes | sdkmanager \
 
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.21.0
 
-RUN go get github.com/ckaznocha/protoc-gen-lint
-RUN go get github.com/nilslice/protolock/cmd/protolock
-RUN go get github.com/josephspurrier/goversioninfo
-RUN go get github.com/loov/leakcheck
-
-RUN GO111MODULE=on go get honnef.co/go/tools/cmd/staticcheck@2019.2.3
-
-# Output formatters
-
-RUN go get github.com/mfridman/tparse
-RUN go get github.com/axw/gocov/gocov
-RUN go get github.com/AlekSi/gocov-xml
+RUN GO111MODULE=on go get \
+    # Linters formatters \
+    github.com/ckaznocha/protoc-gen-lint@v0.2.1 \
+    github.com/nilslice/protolock/cmd/protolock@v0.15.0 \
+    github.com/josephspurrier/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 \
+    github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 \
+    honnef.co/go/tools/cmd/staticcheck@2019.2.3 \
+    # Output formatters \
+    github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
+    github.com/axw/gocov/gocov@v1.0.0 \
+    github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
 
 # Tools in this repository
+COPY . $GOPATH/ci
+WORKDIR $GOPATH/ci
+RUN go install ...
 
-COPY go.mod go.mod
-COPY go.sum go.sum
-
-# TODO:
-#  install directly from this repository rather than pulling
-#  this requires a separate folder setup to not clash with other things.
-RUN go get github.com/storj/ci/...
+# Reset to starting directory
+WORKDIR $GOPATH
 
 # Set our entrypoint to close after 28 minutes, and forcefully close at 30 minutes.
 # This is to prevent Jenkins collecting cats.
