@@ -1,0 +1,29 @@
+pipeline {
+    agent {
+        dockerfile {
+            filename 'Dockerfile'
+            args '-u root:root --cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod'
+            label 'main'
+        }
+    }
+    options {
+          timeout(time: 26, unit: 'MINUTES')
+    }
+    stages {
+        stage('Lint') {
+            steps {
+                sh 'check-copyright'
+                sh 'check-copyright'
+                sh 'check-large-files'
+                sh 'check-imports ./...'
+                sh 'check-peer-constraints'
+                sh 'storj-protobuf --protoc=$HOME/protoc/bin/protoc lint'
+                sh 'storj-protobuf --protoc=$HOME/protoc/bin/protoc check-lock'
+                sh 'check-atomic-align ./...'
+                sh 'check-errs ./...'
+                sh 'staticcheck ./...'
+                sh 'golangci-lint --config /go/ci/.golangci.yml -j=2 run'
+            }
+        }
+    }
+}
