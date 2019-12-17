@@ -89,12 +89,12 @@ RUN GO111MODULE=on go get \
     github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
 
 # Tools in this repository
-COPY . $GOPATH/ci
-WORKDIR $GOPATH/ci
+COPY . /go/ci
+WORKDIR /go/ci
 RUN go install ...
 
 # Reset to starting directory
-WORKDIR $GOPATH
+WORKDIR /go
 
 # Set our entrypoint to close after 28 minutes, and forcefully close at 30 minutes.
 # This is to prevent Jenkins collecting cats.
