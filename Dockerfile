@@ -74,7 +74,7 @@ RUN yes | sdkmanager \
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.21.0
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.22.2
 
 RUN GO111MODULE=on go get \
     # Linters formatters \
