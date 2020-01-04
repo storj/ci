@@ -15,6 +15,7 @@ var ignoreFolder = map[string]bool{
 	"node_modules": true,
 	"coverage":     true,
 	"dist":         true,
+	"dbx":          true,
 }
 
 // Size constants
