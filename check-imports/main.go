@@ -44,8 +44,16 @@ func main() {
 		buildFlags = append(buildFlags, "-race")
 	}
 
+	mode := packages.NeedName |
+		packages.NeedFiles |
+		packages.NeedCompiledGoFiles |
+		packages.NeedImports |
+		packages.NeedTypes |
+		packages.NeedSyntax |
+		packages.NeedDeps
+
 	roots, err := packages.Load(&packages.Config{
-		Mode:       packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports,
+		Mode:       mode,
 		Env:        os.Environ(),
 		BuildFlags: buildFlags,
 		Tests:      true,
