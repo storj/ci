@@ -1,4 +1,4 @@
-FROM golang:1.13.6
+FROM golang:1.14-rc
 
 # CockroachDB
 
