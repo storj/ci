@@ -88,6 +88,15 @@ RUN GO111MODULE=on go get \
     github.com/axw/gocov/gocov@v1.0.0 \
     github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
 
+# Install go-licenses
+#
+# NOTE: It requires its own go path because it uses db files from the licenses
+# go module.
+RUN mkdir -p /ci/go-licenses && \
+    GO111MODULE=on GOPATH=/ci/go-licenses go get \
+    github.com/google/go-licenses@2ee7a02f6ae4f78b6b2d6ef421cedadbeabe2a89
+ENV PATH "$PATH:/ci/go-licenses/bin"
+
 # Tools in this repository
 COPY . /go/ci
 WORKDIR /go/ci
