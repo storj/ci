@@ -27,8 +27,12 @@ func main() {
 	leftover = ignorePrefix(leftover, "web/satellite/node_modules/")
 	leftover = ignorePrefix(leftover, "web/satellite/coverage/")
 	leftover = ignorePrefix(leftover, "web/satellite/dist/")
-	// TODO: shouldn't this be already up to date?
 	leftover = ignorePrefix(leftover, "web/satellite/package-lock.json")
+
+	leftover = ignorePrefix(leftover, "web/storagenode/node_modules/")
+	leftover = ignorePrefix(leftover, "web/storagenode/coverage/")
+	leftover = ignorePrefix(leftover, "web/storagenode/dist/")
+	leftover = ignorePrefix(leftover, "web/storagenode/package-lock.json")
 
 	if len(leftover) != 0 {
 		fmt.Println("Files left-over after running tests:")
