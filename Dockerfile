@@ -9,7 +9,7 @@ RUN cp -i cockroach-v19.2.0.linux-amd64/cockroach /usr/local/bin/
 
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
-RUN curl -sL https://deb.nodesource.com/setup_12.x  | bash -
+RUN curl -sL https://deb.nodesource.com/setup_13.x  | bash -
 
 RUN apt-get update && apt-get install -y -qq postgresql-9.6 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
 
