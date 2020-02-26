@@ -72,6 +72,9 @@ RUN yes | sdkmanager \
     "ndk-bundle" \
     "system-images;android-24;default;x86_64"
 
+# Duplicity backup tool for S3 gateway test scenarios
+RUN apt-get install -y duplicity
+
 # Linters
 
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.23.1
