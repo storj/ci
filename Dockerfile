@@ -73,7 +73,7 @@ RUN yes | sdkmanager \
     "system-images;android-24;default;x86_64"
 
 # Duplicity backup tool for S3 gateway test scenarios
-RUN apt-get install -y duplicity python3-boto
+RUN apt-get install -y duplicity python-pip && pip install boto
 
 # Linters
 
