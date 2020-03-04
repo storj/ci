@@ -75,6 +75,15 @@ RUN yes | sdkmanager \
 # Duplicity backup tool for S3 gateway test scenarios
 RUN apt-get install -y duplicity python-pip && pip install boto
 
+# Duplicati backup tool for S3 gateway test scenarios
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+RUN "deb http://download.mono-project.com/repo/debian stable-buster main" | tee /etc/apt/sources.list.d/mono-official.list
+RUN apt-get update && apt-get -y install mono-devel
+RUN curl -L https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
+# installation from deb is failing but next step will fix missing deps
+RUN dpkg -i /tmp/duplicati.deb; exit 0
+RUN apt install -y -f
+
 # Linters
 
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.23.1
