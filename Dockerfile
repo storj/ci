@@ -9,7 +9,7 @@ RUN cp -i cockroach-v19.2.0.linux-amd64/cockroach /usr/local/bin/
 
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
-RUN curl -sL https://deb.nodesource.com/setup_12.x  | bash -
+RUN curl -sL https://deb.nodesource.com/setup_13.x  | bash -
 
 RUN apt-get update && apt-get install -y -qq postgresql-9.6 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
 
@@ -72,9 +72,21 @@ RUN yes | sdkmanager \
     "ndk-bundle" \
     "system-images;android-24;default;x86_64"
 
+# Duplicity backup tool for S3 gateway test scenarios
+RUN apt-get install -y duplicity python-pip && pip install boto
+
+# Duplicati backup tool for S3 gateway test scenarios
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+RUN "deb http://download.mono-project.com/repo/debian stable-buster main" | tee /etc/apt/sources.list.d/mono-official.list
+RUN apt-get update && apt-get -y install mono-devel
+RUN curl -L https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
+# installation from deb is failing but next step will fix missing deps
+RUN dpkg -i /tmp/duplicati.deb; exit 0
+RUN apt install -y -f
+
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.22.2
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.23.1
 
 RUN GO111MODULE=on go get \
     # Linters formatters \
@@ -87,6 +99,15 @@ RUN GO111MODULE=on go get \
     github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
     github.com/axw/gocov/gocov@v1.0.0 \
     github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
+
+# Install go-licenses
+#
+# NOTE: It requires its own go path because it uses db files from the licenses
+# go module.
+RUN mkdir -p /ci/go-licenses && \
+    GO111MODULE=on GOPATH=/ci/go-licenses go get \
+    github.com/google/go-licenses@2ee7a02f6ae4f78b6b2d6ef421cedadbeabe2a89
+ENV PATH "$PATH:/ci/go-licenses/bin"
 
 # Tools in this repository
 COPY . /go/ci

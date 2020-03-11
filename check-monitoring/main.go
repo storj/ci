@@ -19,7 +19,11 @@ import (
 )
 
 var (
-	monkitPath    = "gopkg.in/spacemonkeygo/monkit.v2"
+	monkitPaths = map[string]struct{}{
+		"gopkg.in/spacemonkeygo/monkit.v2":   {},
+		"github.com/spacemonkeygo/monkit/v3": {},
+	}
+
 	lockFilePerms = os.FileMode(0644)
 )
 
@@ -28,7 +32,11 @@ func main() {
 	flag.Parse()
 
 	pkgs, err := packages.Load(&packages.Config{
-		Mode: packages.NeedCompiledGoFiles | packages.NeedSyntax | packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo,
+		Mode: packages.NeedCompiledGoFiles |
+			packages.NeedSyntax |
+			packages.NeedName |
+			packages.NeedTypes |
+			packages.NeedTypesInfo,
 	}, flag.Args()...)
 	if err != nil {
 		log.Fatalf("error while loading packages: %s", err)
@@ -158,9 +166,17 @@ func findLockedFnNames(pkg *packages.Package) []string {
 func isMonkitCall(pkg *packages.Package, in ast.Node) bool {
 	defer func() { _ = recover() }() // TODO: do not use recover
 
-	ident := in.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.Ident)
+	ident := in.(*ast.CallExpr).
+		Fun.(*ast.SelectorExpr).
+		X.(*ast.Ident)
 
-	return pkg.TypesInfo.Uses[ident].(*types.Var).Type().(*types.Pointer).Elem().(*types.Named).Obj().Pkg().Path() == monkitPath
+	importPath := pkg.TypesInfo.Uses[ident].(*types.Var).
+		Type().(*types.Pointer).
+		Elem().(*types.Named).
+		Obj().Pkg().Path()
+
+	_, match := monkitPaths[importPath]
+	return match
 }
 
 func sortAndUnique(input []string) (unique []string) {
