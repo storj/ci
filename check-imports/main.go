@@ -105,7 +105,7 @@ func main() {
 		exitCode = 1
 
 		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, "Imports are not in the standard grouping [std storj other]:")
+		fmt.Fprintln(os.Stderr, "Imports are not in the standard grouping [std other storj]:")
 		for _, imports := range misgrouped {
 			fmt.Fprintln(os.Stderr, "\t"+imports.Path, imports.Classes())
 		}
