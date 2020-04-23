@@ -18,6 +18,10 @@ var ignoreFolder = map[string]bool{
 	"dbx":          true,
 }
 
+var ignoreFile = map[string]bool{
+	"package-lock.json": true,
+}
+
 // Size constants
 const (
 	KB = 1 << 10
@@ -35,6 +39,9 @@ func main() {
 		}
 		if info.IsDir() && ignoreFolder[info.Name()] {
 			return filepath.SkipDir
+		}
+		if !info.IsDir() && ignoreFile[info.Name()] {
+			return nil
 		}
 
 		size := info.Size()
