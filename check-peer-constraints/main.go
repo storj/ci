@@ -19,6 +19,8 @@ import (
 var IgnorePackages = []string{
 	// Currently overlay contains NodeDossier which is used in multiple places.
 	"storj.io/storj/satellite/overlay",
+	// Overlay depends on nodeselection package, so we need to allow it as well.
+	"storj.io/storj/satellite/nodeselection",
 }
 
 // Libraries contains the list of packages to verify against.
