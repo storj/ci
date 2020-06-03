@@ -86,7 +86,7 @@ RUN apt install -y -f
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.23.1
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.25.0
 
 RUN GO111MODULE=on go get \
     # Linters formatters \
