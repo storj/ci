@@ -17,6 +17,7 @@ def checkRepository(name, repo) {
         stage("${name}") {
             sh "git clone --depth 1 ${repo} ${name}"
             dir(name){
+                sh 'check-mod-tidy'
                 sh 'check-copyright'
                 sh 'check-large-files'
                 sh 'check-imports ./...'
