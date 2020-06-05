@@ -1,3 +1,45 @@
+def repositories = [
+    'https://review.dev.storj.io/storj/common',
+    'https://review.dev.storj.io/storj/uplink',
+    'https://review.dev.storj.io/storj/uplink-c',
+    'https://review.dev.storj.io/storj/private',
+    'https://review.dev.storj.io/storj/gateway',
+    'https://review.dev.storj.io/storj/linksharing',
+    'https://review.dev.storj.io/storj/storj',
+]
+
+def repositoryCheckStages = repositories.collectEntries {
+    [ "${basename(it)}" : checkRepository(basename(it), it) ]
+}
+
+def checkRepository(name, repo) {
+    return {
+        stage("${name}") {
+            sh "git clone --depth 1 ${repo} ${name}"
+            dir(name){
+                sh 'check-copyright'
+                sh 'check-large-files'
+                sh 'check-imports ./...'
+                sh 'check-peer-constraints'
+                sh 'storj-protobuf --protoc=$HOME/protoc/bin/protoc lint'
+                sh 'storj-protobuf --protoc=$HOME/protoc/bin/protoc check-lock'
+                sh 'check-atomic-align ./...'
+                sh 'check-errs ./...'
+                sh 'staticcheck ./...'
+                sh 'golangci-lint --config /go/ci/.golangci.yml run'
+            }
+        }
+    }
+}
+
+def basename(path) {
+    lastPath = path.lastIndexOf('/');
+    if (lastPath!=-1){
+        path = path.substring(lastPath+1);
+    }
+    return path
+}
+
 pipeline {
     agent {
         dockerfile {
@@ -37,6 +79,14 @@ pipeline {
                 sh 'check-errs ./...'
                 sh 'staticcheck ./...'
                 sh 'golangci-lint --config /go/ci/.golangci.yml -j=2 run'
+            }
+        }
+
+        stage('Repos') {
+            steps {
+                script {
+                    parallel(repositoryCheckStages)
+                }
             }
         }
     }
