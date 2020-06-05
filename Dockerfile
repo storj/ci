@@ -1,4 +1,4 @@
-FROM golang:1.13.8
+FROM golang:1.14.4
 
 # CockroachDB
 
@@ -86,7 +86,7 @@ RUN apt install -y -f
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.23.1
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.25.0
 
 RUN GO111MODULE=on go get \
     # Linters formatters \
@@ -94,7 +94,7 @@ RUN GO111MODULE=on go get \
     github.com/nilslice/protolock/cmd/protolock@v0.15.0 \
     github.com/josephspurrier/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 \
     github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 \
-    honnef.co/go/tools/cmd/staticcheck@2019.2.3 \
+    honnef.co/go/tools/cmd/staticcheck@v0.0.1-2020.1.4 \
     # Output formatters \
     github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
     github.com/axw/gocov/gocov@v1.0.0 \
