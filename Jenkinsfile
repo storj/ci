@@ -26,7 +26,8 @@ def checkRepository(name, repo) {
                 sh 'check-atomic-align ./...'
                 sh 'check-errs ./...'
                 sh 'staticcheck ./...'
-                sh 'golangci-lint --config /go/ci/.golangci.yml run'
+
+                sh 'golangci-lint run --allow-parallel-runners --config /go/ci/.golangci.yml'
             }
         }
     }
