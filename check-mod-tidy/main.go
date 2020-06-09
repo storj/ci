@@ -26,16 +26,25 @@ func check() (err error) {
 	}
 
 	defer func() {
-		err := os.RemoveAll(tempDir)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to delete temporary directory: %v\n", err)
+		if _, err := os.Stat(tempDir); err == nil {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to delete temporary directory: %v\n", err)
+			}
 		}
 	}()
 
-	err = copyDir(".", tempDir)
+	err = worktreeAdd(tempDir)
 	if err != nil {
-		return fmt.Errorf("failed to copy dir: %w", err)
+		return fmt.Errorf("failed to add worktree: %w", err)
 	}
+
+	defer func() {
+		err = worktreeRemove(tempDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to remove worktree: %v\n", err)
+		}
+	}()
 
 	err = os.Chdir(tempDir)
 	if err != nil {
@@ -84,8 +93,15 @@ func tidy() (err error) {
 	return err
 }
 
-func copyDir(src, dst string) error {
-	cmd := exec.Command("cp", "-a", src, dst)
+func worktreeAdd(dst string) (err error) {
+	cmd := exec.Command("git", "worktree", "add", "--detach", dst)
+	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
+
+	return cmd.Run()
+}
+
+func worktreeRemove(dst string) (err error) {
+	cmd := exec.Command("git", "worktree", "remove", "--force", dst)
 	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 
 	return cmd.Run()
