@@ -1,4 +1,5 @@
-FROM golang:1.14.4
+ARG GO_VERSION
+FROM golang:${GO_VERSION:-latest}
 
 # CockroachDB
 
