@@ -2,8 +2,8 @@ FROM golang:1.14.4
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v19.2.0.linux-amd64.tgz | tar  xvz
-RUN cp -i cockroach-v19.2.0.linux-amd64/cockroach /usr/local/bin/
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.1.1.linux-amd64.tgz | tar  xvz
+RUN cp -i cockroach-v20.1.1.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
@@ -11,15 +11,15 @@ RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
 RUN curl -sL https://deb.nodesource.com/setup_13.x  | bash -
 
-RUN apt-get update && apt-get install -y -qq postgresql-9.6 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
+RUN apt-get update && apt-get install -y -qq postgresql-12 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
 
-RUN rm /etc/postgresql/9.6/main/pg_hba.conf; \
-	echo 'local   all             all                                     trust' >> /etc/postgresql/9.6/main/pg_hba.conf; \
-	echo 'host    all             all             127.0.0.1/8             trust' >> /etc/postgresql/9.6/main/pg_hba.conf; \
-	echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/9.6/main/pg_hba.conf; \
-	echo 'host    all             all             ::0/0                   trust' >> /etc/postgresql/9.6/main/pg_hba.conf;
+RUN rm /etc/postgresql/12/main/pg_hba.conf; \
+	echo 'local   all             all                                     trust' >> /etc/postgresql/12/main/pg_hba.conf; \
+	echo 'host    all             all             127.0.0.1/8             trust' >> /etc/postgresql/12/main/pg_hba.conf; \
+	echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/12/main/pg_hba.conf; \
+	echo 'host    all             all             ::0/0                   trust' >> /etc/postgresql/12/main/pg_hba.conf;
 
-RUN echo 'max_connections = 1000' >> /etc/postgresql/9.6/main/conf.d/connectionlimits.conf
+RUN echo 'max_connections = 1000' >> /etc/postgresql/12/main/conf.d/connectionlimits.conf
 
 # Tooling
 
