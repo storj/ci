@@ -30,6 +30,9 @@ ENV PATH "$PATH:/root/bin"
 RUN curl -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o /tmp/protoc.zip
 RUN unzip /tmp/protoc.zip -d "$HOME"/protoc
 
+# Android/Java binding tests
+RUN apt-get install -y default-jre
+
 # Duplicity backup tool for S3 gateway test scenarios
 RUN apt-get install -y duplicity python-pip && pip install boto
 
