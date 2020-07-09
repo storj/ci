@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -34,7 +35,7 @@ func main() {
 
 	pkgs, err := ProcessWithEcho(stdin)
 	if err != nil {
-		if err == parse.ErrNotParseable {
+		if errors.Is(err, parse.ErrNotParseable) {
 			fmt.Fprintf(os.Stderr, "tparse error: no parseable events: call go test with -json flag\n\n")
 		} else {
 			fmt.Fprintf(os.Stderr, "tparse error: %v\n\n", err)
@@ -284,7 +285,7 @@ func ProcessWithEcho(r io.Reader) (parse.Packages, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("bufio scanner error: %v", err)
+		return nil, fmt.Errorf("bufio scanner error: %w", err)
 	}
 	if !scan {
 		return nil, parse.ErrNotParseable

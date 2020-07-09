@@ -22,7 +22,7 @@ var ignoreFile = map[string]bool{
 	"package-lock.json": true,
 }
 
-// Size constants
+// Size constants.
 const (
 	KB = 1 << 10
 )

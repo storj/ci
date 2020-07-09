@@ -244,10 +244,10 @@ func (group ImportGroup) Class() Class {
 	return class
 }
 
-// Class defines a bitset of import classification
+// Class defines a bitset of import classification.
 type Class byte
 
-// Class defines three different groups
+// Class defines three different groups.
 const (
 	// Standard is all go standard packages
 	Standard Class = 1 << iota

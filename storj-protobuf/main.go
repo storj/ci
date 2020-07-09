@@ -65,7 +65,7 @@ func run(command, root string) error {
 	case "check-lock":
 		return walkdirs(root, checklock)
 	default:
-		return errors.New("unknown command " + command)
+		return fmt.Errorf("unknown command %q", command)
 	}
 }
 
@@ -192,12 +192,12 @@ func checklock(dir string, dirs []string, files []string) error {
 
 	original, err := ioutil.ReadFile(filepath.Join(protolockdir, "proto.lock"))
 	if err != nil {
-		return fmt.Errorf("unable to read proto.lock: %v", err)
+		return fmt.Errorf("unable to read proto.lock: %w", err)
 	}
 
 	err = ioutil.WriteFile(filepath.Join(tmpdir, "proto.lock"), original, 0755)
 	if err != nil {
-		return fmt.Errorf("unable to read proto.lock: %v", err)
+		return fmt.Errorf("unable to read proto.lock: %w", err)
 	}
 
 	cmd := exec.Command("protolock", "commit", "-lockdir", tmpdir)
@@ -212,7 +212,7 @@ func checklock(dir string, dirs []string, files []string) error {
 
 	changed, err := ioutil.ReadFile(filepath.Join(tmpdir, "proto.lock"))
 	if err != nil {
-		return fmt.Errorf("unable to read new proto.lock: %v", err)
+		return fmt.Errorf("unable to read new proto.lock: %w", err)
 	}
 
 	if !bytes.Equal(original, changed) {

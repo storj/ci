@@ -26,7 +26,10 @@ linters:
     - scopelint               # checks for unpinned variables
     - gocritic                # checks for style, performance issues, and common programming errors
     - dogsled                 # checks for too many ignored arguments
-    - goprintffuncname        # Checks that printf-like functions are named with `f` at the end [fast: true, auto-fix: false]
+    - goprintffuncname        # checks that printf-like functions are named with `f` at the end [fast: true, auto-fix: false]
+    - exportloopref           # check for exported loop vars
+    - godot                   # dots for everything
+    - goerr113                # check error expressions
     #TODO#- whitespace        # checks for leading/trailing newlines
     #TODO#- unparam           # check for unused parameters
     #TODO#- maligned          # check for better memory usage
@@ -47,6 +50,9 @@ linters:
     - unused          # part of staticcheck
     - lll
     - rowserrcheck    # checks if sql.Rows.Err is checked correctly - Disabled  because it reports false positive with defer statements after Query call
+    - asciicheck      # non-ascii is allowed
+    - funlen          # no limit on func length
+    - goheader        # separate tool
   fast: false
 
 output:
@@ -128,3 +134,8 @@ issues:
   max-same-issues: 0
   new: false
   exclude-use-default: false
+
+  exclude-rules:
+    - linters:
+        - goerr113
+      text: "do not define dynamic errors"

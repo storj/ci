@@ -14,7 +14,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// holds on to the eventual exit code
+// exit holds on to the eventual exit code.
 var exit int
 
 func main() {
