@@ -27,8 +27,7 @@ COPY ./scripts/install-awscli.sh /tmp/install-awscli.sh
 RUN bash /tmp/install-awscli.sh
 ENV PATH "$PATH:/root/bin"
 
-RUN curl -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o /tmp/protoc.zip
-RUN unzip /tmp/protoc.zip -d "$HOME"/protoc
+RUN curl -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o /tmp/protoc.zip && unzip /tmp/protoc.zip -d "$HOME"/protoc
 
 # Android/Java binding tests
 RUN apt-get install -y default-jre
