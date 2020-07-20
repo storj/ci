@@ -27,7 +27,7 @@ linters:
     - gocritic                # checks for style, performance issues, and common programming errors
     - dogsled                 # checks for too many ignored arguments
     - goprintffuncname        # checks that printf-like functions are named with `f` at the end [fast: true, auto-fix: false]
-    #BUG# - exportloopref           # check for exported loop vars
+    - exportloopref           # check for exported loop vars
     - godot                   # dots for everything
     - goerr113                # check error expressions
     #TODO#- whitespace        # checks for leading/trailing newlines
