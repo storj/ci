@@ -1,12 +1,10 @@
 FROM golang:1.14.6
 
 # Postgres
-
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
-RUN curl -sL https://deb.nodesource.com/setup_13.x  | bash -
 
-RUN apt-get update && apt-get install -y -qq postgresql-12 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
+RUN apt-get update && apt-get install -y -qq postgresql-12 redis-server unzip libuv1-dev libjson-c-dev nettle-dev
 
 RUN rm /etc/postgresql/12/main/pg_hba.conf; \
 	echo 'local   all             all                                     trust' >> /etc/postgresql/12/main/pg_hba.conf; \
@@ -16,28 +14,8 @@ RUN rm /etc/postgresql/12/main/pg_hba.conf; \
 
 RUN echo 'max_connections = 1000' >> /etc/postgresql/12/main/conf.d/connectionlimits.conf
 
-# Tooling
-
-# COPY ./scripts/install-awscli.sh /tmp/install-awscli.sh
-# RUN bash /tmp/install-awscli.sh
-ENV PATH "$PATH:/root/bin"
-
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protoc-3.12.3-linux-x86_64.zip -o /tmp/protoc.zip && unzip /tmp/protoc.zip -d "$HOME"/protoc
-
 # Android/Java binding tests
 RUN apt-get install -y default-jre
-
-# Duplicity backup tool for S3 gateway test scenarios
-RUN apt-get install -y duplicity python-pip && pip install boto
-
-# Duplicati backup tool for S3 gateway test scenarios
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-RUN "deb http://download.mono-project.com/repo/debian stable-buster main" | tee /etc/apt/sources.list.d/mono-official.list
-RUN apt-get update && apt-get -y install mono-devel
-RUN curl -L https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
-# installation from deb is failing but next step will fix missing deps
-RUN dpkg -i /tmp/duplicati.deb; exit 0
-RUN apt install -y -f
 
 # Android SDK + NDK
 
@@ -80,22 +58,6 @@ RUN yes | sdkmanager --update --channel=3
 RUN yes | sdkmanager \
     "ndk-bundle" \
     "system-images;android-24;default;x86_64"
-
-# Linters
-
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.29.0
-
-RUN GO111MODULE=on go get \
-    # Linters formatters \
-    github.com/ckaznocha/protoc-gen-lint@v0.2.1 \
-    github.com/nilslice/protolock/cmd/protolock@v0.15.0 \
-    github.com/josephspurrier/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 \
-    github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 \
-    honnef.co/go/tools/cmd/staticcheck@v0.0.1-2020.1.4 \
-    # Output formatters \
-    github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
-    github.com/axw/gocov/gocov@v1.0.0 \
-    github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
 
 # Install go-licenses
 #
