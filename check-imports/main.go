@@ -249,11 +249,11 @@ type Class byte
 
 // Class defines three different groups.
 const (
-	// Standard is all go standard packages
+	// Standard is all go standard packages.
 	Standard Class = 1 << iota
-	// Storj is imports that start with `storj.io`
+	// Storj is imports that start with `storj.io`.
 	Storj
-	// Other is everything else
+	// Other is everything else.
 	Other
 )
 
