@@ -1,5 +1,7 @@
 FROM golang:1.14.7
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 # CockroachDB
 
 RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.1.1.linux-amd64.tgz | tar  xvz
@@ -7,9 +9,9 @@ RUN cp -i cockroach-v20.1.1.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
-RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN curl -sf https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
-RUN curl -sL https://deb.nodesource.com/setup_13.x  | bash -
+RUN curl -sfL https://deb.nodesource.com/setup_14.x  | bash -
 
 RUN apt-get update && apt-get install -y -qq postgresql-12 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
 
@@ -27,7 +29,7 @@ COPY ./scripts/install-awscli.sh /tmp/install-awscli.sh
 RUN bash /tmp/install-awscli.sh
 ENV PATH "$PATH:/root/bin"
 
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protoc-3.12.3-linux-x86_64.zip -o /tmp/protoc.zip && unzip /tmp/protoc.zip -d "$HOME"/protoc
+RUN curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protoc-3.12.3-linux-x86_64.zip -o /tmp/protoc.zip && unzip /tmp/protoc.zip -d "$HOME"/protoc
 
 # Android/Java binding tests
 RUN apt-get install -y default-jre
@@ -37,11 +39,11 @@ RUN apt-get install -y duplicity python-pip && pip install boto
 
 # Duplicati backup tool for S3 gateway test scenarios
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-RUN "deb http://download.mono-project.com/repo/debian stable-buster main" | tee /etc/apt/sources.list.d/mono-official.list
+RUN echo "deb http://download.mono-project.com/repo/debian stable-buster main" | tee /etc/apt/sources.list.d/mono-official.list
 RUN apt-get update && apt-get -y install mono-devel
-RUN curl -L https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
+RUN curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
 # installation from deb is failing but next step will fix missing deps
-RUN dpkg -i /tmp/duplicati.deb; exit 0
+RUN dpkg -i /tmp/duplicati.deb || true
 RUN apt install -y -f
 
 # Linters
