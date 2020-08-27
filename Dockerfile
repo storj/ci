@@ -42,9 +42,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E03280
 RUN echo "deb http://download.mono-project.com/repo/debian stable-buster main" | tee /etc/apt/sources.list.d/mono-official.list
 RUN apt-get update && apt-get -y install mono-devel
 RUN curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
-# installation from deb is failing but next step will fix missing deps
-RUN dpkg -i /tmp/duplicati.deb || true
-RUN apt install -y -f
+RUN apt -y install /tmp/duplicati.deb
 
 # Linters
 
