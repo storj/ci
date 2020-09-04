@@ -38,9 +38,7 @@ RUN apt-get install -y default-jre
 RUN apt-get install -y duplicity python-pip && pip install boto
 
 # Duplicati backup tool for S3 gateway test scenarios
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-RUN echo "deb http://download.mono-project.com/repo/debian stable-buster main" | tee /etc/apt/sources.list.d/mono-official.list
-RUN apt-get update && apt-get -y install mono-devel
+RUN apt-get -y install mono-devel
 RUN curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
 RUN apt -y install /tmp/duplicati.deb
 
