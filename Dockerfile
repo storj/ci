@@ -42,6 +42,9 @@ RUN apt-get -y install mono-devel
 RUN curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
 RUN apt -y install /tmp/duplicati.deb
 
+# Minio mint test suite
+RUN apt-get install -y wget jq curl git dnsmasq python3-dateutil
+
 # Linters
 
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.30.0
