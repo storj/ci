@@ -26,6 +26,7 @@ def checkRepository(name, repo) {
                 sh 'storj-protobuf --protoc=$HOME/protoc/bin/protoc check-lock'
                 sh 'check-atomic-align ./...'
                 sh 'check-errs ./...'
+                sh 'check-monkit ./...'
                 sh 'staticcheck ./...'
 
                 sh 'golangci-lint run --allow-parallel-runners --config /go/ci/.golangci.yml'
