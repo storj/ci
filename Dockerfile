@@ -43,7 +43,13 @@ RUN curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o 
 RUN apt -y install /tmp/duplicati.deb
 
 # Minio mint test suite
-RUN apt-get install -y wget jq curl git dnsmasq python3-dateutil
+#RUN apt-get install -y wget jq curl git dnsmasq python3-dateutil
+#RUN git clone https://github.com/minio/minio
+#RUN cp -r minio/mint /mint
+#RUN sed -i 's/openjdk-8/openjdk-11/' /mint/install-packages.list
+#RUN sed -i 's/openjdk-8/openjdk-11/' /mint/remove-packages.list
+#RUN sed -i 's/python3\.6/python3\.7/' /mint/preinstall.sh
+#RUN MINT_ROOT_DIR="/mint" /mint/release.sh
 
 # Linters
 
