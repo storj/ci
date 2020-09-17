@@ -70,7 +70,7 @@ RUN git remote add -f origin https://github.com/minio/minio
 RUN git config core.SparseCheckout true
 RUN echo "mint" >> .git/info/sparse-checkout
 RUN git pull --depth=1 origin master
-RUN mv -r mint /mint
+RUN mv mint /mint
 RUN sed -i 's/openjdk-8/openjdk-11/' /mint/install-packages.list
 RUN sed -i 's/openjdk-8/openjdk-11/' /mint/remove-packages.list
 RUN sed -i 's/python3\.6/python3\.7/' /mint/preinstall.sh
