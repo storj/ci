@@ -62,20 +62,21 @@ RUN apt-get install -yq clang-format
 
 # Minio mint test suite
 RUN apt-get install -y wget jq curl git dnsmasq python3-dateutil
-RUN mkdir /mint-tmp
-WORKDIR /mint-tmp
-RUN git version
-RUN git init
-RUN git remote add -f origin https://github.com/minio/minio
-RUN git config core.SparseCheckout true
-RUN echo "mint" >> .git/info/sparse-checkout
-RUN git pull --depth=1 origin master
-RUN mv mint /mint
+#RUN mkdir /mint-tmp
+#WORKDIR /mint-tmp
+#RUN git version
+#RUN git init
+#RUN git remote add -f origin https://github.com/minio/minio
+#RUN git config core.SparseCheckout true
+#RUN echo "mint" >> .git/info/sparse-checkout
+#RUN git pull --depth=1 origin master
+RUN git clone https://github.com/minio/minio
+RUN mv minio/mint /mint
 RUN sed -i 's/openjdk-8/openjdk-11/' /mint/install-packages.list
 RUN sed -i 's/openjdk-8/openjdk-11/' /mint/remove-packages.list
 RUN sed -i 's/python3\.6/python3\.7/' /mint/preinstall.sh
 RUN MINT_ROOT_DIR="/mint" /mint/release.sh
-RUN rm -rf /mint-tmp
+RUN rm -rf minio
 
 # Install go-licenses
 #
