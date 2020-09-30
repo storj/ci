@@ -56,7 +56,8 @@ RUN GO111MODULE=on go get \
     # Output formatters \
     github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
     github.com/axw/gocov/gocov@v1.0.0 \
-    github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
+    github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 \
+    github.com/tailscale/depaware@e09ee10c18249e4bf198e66bbd47babcd502637a
 
 RUN apt-get install -yq clang-format
 
