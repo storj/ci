@@ -26,9 +26,9 @@ func check() (err error) {
 	}
 
 	defer func() {
-		if _, err := os.Stat(tempDir); err == nil {
-			err := os.RemoveAll(tempDir)
-			if err != nil {
+		if _, ierr := os.Stat(tempDir); ierr == nil {
+			ierr := os.RemoveAll(tempDir)
+			if ierr != nil {
 				fmt.Fprintf(os.Stderr, "failed to delete temporary directory: %v\n", err)
 			}
 		}
@@ -40,9 +40,10 @@ func check() (err error) {
 	}
 
 	defer func() {
-		err = worktreeRemove(tempDir)
-		if err != nil {
+		ierr := worktreeRemove(tempDir)
+		if ierr != nil {
 			fmt.Fprintf(os.Stderr, "failed to remove worktree: %v\n", err)
+			err = ierr
 		}
 	}()
 
