@@ -34,16 +34,16 @@ func main() {
 	stdin := io.TeeReader(os.Stdin, &buffer)
 
 	pkgs, err := ProcessWithEcho(stdin)
+	errcode := pkgs.ExitCode()
 	if err != nil {
 		if errors.Is(err, parse.ErrNotParseable) {
 			fmt.Fprintf(os.Stderr, "tparse error: no parseable events: call go test with -json flag\n\n")
 		} else {
 			fmt.Fprintf(os.Stderr, "tparse error: %v\n\n", err)
 		}
-		defer os.Exit(1)
-	} else {
-		defer os.Exit(pkgs.ExitCode())
+		errcode = 1
 	}
+	defer os.Exit(errcode)
 
 	output, err := os.Create(*xunit)
 	if err != nil {
