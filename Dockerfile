@@ -44,7 +44,7 @@ RUN apt -y install /tmp/duplicati.deb
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.31.0
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.32.0
 
 RUN GO111MODULE=on go get \
     # Linters formatters \
