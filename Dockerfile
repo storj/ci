@@ -57,7 +57,7 @@ RUN GO111MODULE=on go get \
     github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
     github.com/axw/gocov/gocov@v1.0.0 \
     github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 \
-    github.com/tailscale/depaware@5d95aab075bea4f05be0b0aba8ffd63e89092838
+    github.com/tailscale/depaware@e2f543bafb1d2b45d19324d0637453df76662408
 
 RUN apt-get install -yq clang-format
 
