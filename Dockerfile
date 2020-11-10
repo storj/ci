@@ -1,11 +1,11 @@
-FROM golang:1.15.2
+FROM golang:1.15.4
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.1.1.linux-amd64.tgz | tar  xvz
-RUN cp -i cockroach-v20.1.1.linux-amd64/cockroach /usr/local/bin/
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.0.linux-amd64.tgz | tar  xvz
+RUN cp -i cockroach-v20.2.0.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
