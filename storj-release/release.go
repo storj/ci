@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
@@ -32,10 +33,6 @@ var osarches = []OsArch{
 	{"freebsd", "amd64"},
 }
 
-var (
-	components string
-)
-
 // Env contains all necessary environment settings for the build.
 type Env struct {
 	Log        *log.Logger
@@ -55,6 +52,9 @@ type Env struct {
 }
 
 func main() {
+	var err error
+	var components string
+
 	env := Env{}
 	env.Log = log.New(os.Stderr, "", log.Lshortfile)
 	flag.StringVar(&env.ReleaseDir, "release-dir", "release", "release directory")
@@ -64,20 +64,19 @@ func main() {
 
 	flag.Parse()
 
-	var err error
-
 	env.WorkDir, err = os.Getwd()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to get working directory: %v\n", err)
 		os.Exit(1)
 	}
+	env.Log.Printf("Work-Dir: %s", env.WorkDir)
 
-	gopath, err := exec.Command("go", "env", "GOPATH").CombinedOutput()
+	/*gopath, err := exec.Command("go", "env", "GOPATH").CombinedOutput()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to get GOPATH: %v\n", err)
 		os.Exit(1)
 	}
-	env.GOPATH = strings.TrimSpace(string(gopath))
+	env.GOPATH = strings.TrimSpace(string(gopath))*/
 
 	err = env.FetchVersionInfo()
 	if err != nil {
@@ -122,8 +121,8 @@ func (env *Env) FetchVersionInfo() error {
 	return nil
 }
 
-// ConstructFolderName creates the folder name for storing the release assets.
-func (env *Env) ConstructFolderName() string {
+// AssetsFolder creates the folder name for storing the release assets.
+func (env *Env) AssetsFolder() string {
 	// custom branch
 	if env.BranchName != "" {
 		return fmt.Sprintf("%s-%s-go%s", env.Commit.Hash, env.BranchName, env.GoVersion)
@@ -138,7 +137,7 @@ func (env *Env) ConstructFolderName() string {
 
 // BuildComponents builds binaries for the passed in component list.
 func (env *Env) BuildComponents(components []string) error {
-	tagDir := filepath.Join(env.ReleaseDir, env.ConstructFolderName())
+	tagDir := filepath.Join(env.ReleaseDir, env.AssetsFolder())
 	if err := os.MkdirAll(tagDir, 0755); err != nil {
 		return fmt.Errorf("failed to create tagdir %q: %w", tagDir, err)
 	}
@@ -225,12 +224,19 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		}
 	}
 
+	cUser, err := user.Current()
+	if err != nil {
+		return fmt.Errorf("failed to get user ID: %w", err)
+	}
+
 	cmd := exec.Command("docker", "run", "--rm",
+		// set user
+		"-u", fmt.Sprintf("%s:%s", cUser.Uid, cUser.Gid),
 		// setup build folder
 		"-v", env.WorkDir+":/go/build",
 		"-w", "/go/build",
 		// use a shared package cache to avoid downloading
-		"-v", filepath.Join(env.GOPATH, "pkg")+":/go/pkg",
+		//"-v", filepath.Join(env.GOPATH, "pkg")+":/go/pkg",
 		// setup correct os/arch
 		"-e", "GOOS="+osarch.Os, "-e", "GOARCH="+osarch.Arch,
 		"-e", "GOARM=6", "-e", "CGO_ENABLED=1",
