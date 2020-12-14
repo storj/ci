@@ -52,7 +52,7 @@ RUN GO111MODULE=on go get \
     github.com/nilslice/protolock/cmd/protolock@v0.15.0 \
     github.com/josephspurrier/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 \
     github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 \
-    honnef.co/go/tools/cmd/staticcheck@2020.1.6 \
+    honnef.co/go/tools/cmd/staticcheck@2020.2 \
     # Output formatters \
     github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
     github.com/axw/gocov/gocov@v1.0.0 \
