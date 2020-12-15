@@ -5,6 +5,7 @@ def repositories = [
     'https://review.dev.storj.io/storj/private',
     'https://review.dev.storj.io/storj/gateway',
     'https://review.dev.storj.io/storj/gateway-mt',
+    'https://review.dev.storj.io/storj/minio',
     'https://review.dev.storj.io/storj/linksharing',
     'https://review.dev.storj.io/storj/storj',
     'https://review.dev.storj.io/storj/drpc'
