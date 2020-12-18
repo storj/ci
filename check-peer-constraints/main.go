@@ -15,20 +15,10 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// IgnorePackages is a list of packages that are allowed to have bad-imports.
-var IgnorePackages = []string{
-	// Currently overlay contains NodeDossier which is used in multiple places.
-	"storj.io/storj/satellite/overlay",
-	// Overlay depends on nodeselection package, so we need to allow it as well.
-	"storj.io/storj/satellite/nodeselection",
-}
-
 // Libraries contains the list of packages to verify against.
 var Libraries = []string{
 	"storj.io/storj/pkg/...",
-	"storj.io/storj/lib/...",
-	"storj.io/storj/uplink/...",
-	"storj.io/storj/mobile/...",
+	"storj.io/storj/private/...",
 	"storj.io/storj/storage/...",
 }
 
@@ -37,8 +27,8 @@ var Peers = []string{
 	"storj.io/storj/satellite/...",
 	"storj.io/storj/storagenode/...",
 	"storj.io/storj/versioncontrol/...",
-	"storj.io/storj/linksharing/...",
 	"storj.io/storj/certificate/...",
+	"storj.io/storj/multinode/...",
 }
 
 // Cmds contains the list of command packages.
@@ -131,6 +121,9 @@ func match(pkgs []*packages.Package, globs ...string) []*packages.Package {
 	var rs []*packages.Package
 	for _, pkg := range pkgs {
 		if rx.MatchString(pkg.PkgPath) {
+			if ignorePkg(pkg) {
+				continue
+			}
 			rs = append(rs, pkg)
 		}
 	}
@@ -173,12 +166,7 @@ func links(source, destination []*packages.Package) bool {
 }
 
 func ignorePkg(pkg *packages.Package) bool {
-	for _, ignorePkg := range IgnorePackages {
-		if strings.HasPrefix(pkg.PkgPath, ignorePkg) {
-			return true
-		}
-	}
-	return false
+	return strings.Contains(pkg.PkgPath, "/test")
 }
 
 func flatten(pkgs []*packages.Package) []*packages.Package {
