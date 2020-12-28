@@ -128,7 +128,7 @@ func (env *Env) ConstructFolderName() string {
 	if env.BranchName != "" {
 		return fmt.Sprintf("%s-%s-go%s", env.Commit.Hash, env.BranchName, env.GoVersion)
 	}
-	// master branch
+	// main branch
 	if env.Commit.Version.String() == "0.0.0" {
 		return fmt.Sprintf("%s-go%s", env.Commit.Hash, env.GoVersion)
 	}
