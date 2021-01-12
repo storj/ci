@@ -20,6 +20,7 @@ var ignoreFolder = map[string]bool{
 
 var ignoreFile = map[string]bool{
 	"package-lock.json": true,
+	"icon.go":           true,
 }
 
 // Size constants.

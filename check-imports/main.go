@@ -29,9 +29,11 @@ check-imports verifies whether imports are divided into three blocks:
 
 */
 
-var race = flag.Bool("race", false, "load with race tag")
-
 func main() {
+	race := flag.Bool("race", false, "load with race tag")
+	withdeps := flag.Bool("deps", false, "include deps in analysis")
+	depprefix := flag.String("depprefix", "storj.io", "verify only deps with this prefix")
+
 	flag.Parse()
 
 	pkgNames := flag.Args()
@@ -65,28 +67,31 @@ func main() {
 
 	fmt.Println("checking import order:")
 
-	// load all packages
-	seen := map[*packages.Package]bool{}
-	pkgs := []*packages.Package{}
+	makeStdList(roots)
 
-	var visit func(*packages.Package)
-	visit = func(p *packages.Package) {
-		if seen[p] {
-			return
+	pkgs := roots
+	if *withdeps {
+		// load all packages
+		seen := map[*packages.Package]bool{}
+		pkgs = []*packages.Package{}
+
+		var visit func(*packages.Package)
+		visit = func(p *packages.Package) {
+			if seen[p] {
+				return
+			}
+			if strings.HasPrefix(p.ID, *depprefix) {
+				pkgs = append(pkgs, p)
+			}
+
+			seen[p] = true
+			for _, pkg := range p.Imports {
+				visit(pkg)
+			}
 		}
-		includeStd(p)
-
-		if strings.HasPrefix(p.ID, "storj.io") {
-			pkgs = append(pkgs, p)
-		}
-
-		seen[p] = true
-		for _, pkg := range p.Imports {
+		for _, pkg := range roots {
 			visit(pkg)
 		}
-	}
-	for _, pkg := range roots {
-		visit(pkg)
 	}
 
 	// sort the packages
@@ -337,6 +342,26 @@ func LoadImports(fset *token.FileSet, name string, f *ast.File) Imports {
 
 var root = runtime.GOROOT()
 var stdlib = map[string]bool{}
+
+func makeStdList(roots []*packages.Package) {
+	seen := map[*packages.Package]bool{}
+	var visit func(*packages.Package)
+	visit = func(p *packages.Package) {
+		if seen[p] {
+			return
+		}
+		includeStd(p)
+
+		seen[p] = true
+		for _, pkg := range p.Imports {
+			visit(pkg)
+		}
+	}
+
+	for _, pkg := range roots {
+		visit(pkg)
+	}
+}
 
 func includeStd(p *packages.Package) {
 	if len(p.GoFiles) == 0 {
