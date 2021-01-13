@@ -34,6 +34,9 @@ func main() {
 	leftover = ignorePrefix(leftover, "web/storagenode/dist/")
 	leftover = ignorePrefix(leftover, "web/storagenode/package-lock.json")
 
+	leftover = ignorePrefix(leftover, "satellite/wasm/tests/node_modules/")
+	leftover = ignorePrefix(leftover, "satellite/wasm/tests/package-lock.json")
+
 	if len(leftover) != 0 {
 		fmt.Println("Files left-over after running tests:")
 		for _, file := range leftover {
