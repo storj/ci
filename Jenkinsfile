@@ -17,7 +17,7 @@ def repositoryCheckStages = repositories.collectEntries {
 def checkRepository(name, repo) {
     return {
         stage("${name}") {
-            sh "git clone --depth 1 ${repo} ${name}"
+            sh "git clone --depth 2 ${repo} ${name}"
             dir(name){
                 sh 'check-mod-tidy'
                 sh 'check-copyright'
@@ -32,6 +32,7 @@ def checkRepository(name, repo) {
                 sh 'check-errs ./...'
                 sh 'check-monkit ./...'
                 sh 'staticcheck ./...'
+                sh 'check-downgrades'
 
                 sh 'golangci-lint run --allow-parallel-runners --config /go/ci/.golangci.yml'
             }
@@ -86,6 +87,7 @@ pipeline {
                 sh 'check-errs ./...'
                 sh 'staticcheck ./...'
                 sh 'golangci-lint --config /go/ci/.golangci.yml -j=2 run'
+                sh 'check-downgrades'
             }
         }
 
