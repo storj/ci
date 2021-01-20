@@ -1,10 +1,10 @@
-FROM golang:1.15.6
+FROM golang:1.15.7
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.2.linux-amd64.tgz | tar  xvz
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.3.linux-amd64.tgz | tar  xvz
 RUN cp -i cockroach-v20.2.2.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
@@ -44,15 +44,13 @@ RUN apt -y install /tmp/duplicati.deb
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.33.0
-
 RUN GO111MODULE=on go get \
     # Linters formatters \
     github.com/ckaznocha/protoc-gen-lint@v0.2.1 \
     github.com/nilslice/protolock/cmd/protolock@v0.15.0 \
     github.com/josephspurrier/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 \
     github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 \
-    honnef.co/go/tools/cmd/staticcheck@2020.2 \
+    honnef.co/go/tools/cmd/staticcheck@2020.2.1 \
     # Output formatters \
     github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
     github.com/axw/gocov/gocov@v1.0.0 \
