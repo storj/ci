@@ -2,6 +2,10 @@ FROM golang:1.15.7
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
+# Older versions of Go
+
+RUN GO111MODULE=on go get golang.org/dl/go1.14 && go1.14 download
+
 # CockroachDB
 
 RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.3.linux-amd64.tgz | tar  xvz

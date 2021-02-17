@@ -32,7 +32,7 @@ def checkRepository(name, repo) {
                 sh 'check-errs ./...'
                 sh 'check-monkit ./...'
                 sh 'staticcheck ./...'
-                sh 'check-downgrades'
+                // sh 'check-downgrades'
 
                 sh 'golangci-lint run --allow-parallel-runners --config /go/ci/.golangci.yml'
             }
