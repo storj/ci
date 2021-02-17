@@ -1,4 +1,4 @@
-FROM golang:1.15.7
+FROM golang:1.16
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -8,8 +8,8 @@ RUN GO111MODULE=on go get golang.org/dl/go1.14 && go1.14 download
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.3.linux-amd64.tgz | tar  xvz
-RUN cp -i cockroach-v20.2.3.linux-amd64/cockroach /usr/local/bin/
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.5.linux-amd64.tgz | tar  xvz
+RUN cp -i cockroach-v20.2.5.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
@@ -48,7 +48,7 @@ RUN apt -y install /tmp/duplicati.deb
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.35.2
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.37.0
 
 RUN GO111MODULE=on go get \
     # Linters formatters \
