@@ -19,8 +19,7 @@ def checkRepository(name, repo) {
         stage("${name}") {
             sh "git clone --depth 2 ${repo} ${name}"
             dir(name){
-                // disabled temporarily for go version upgrade.
-                // sh 'check-mod-tidy'
+                sh 'check-mod-tidy'
                 sh 'check-copyright'
                 sh 'check-large-files'
                 sh 'check-imports ./...'
