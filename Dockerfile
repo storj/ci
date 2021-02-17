@@ -1,15 +1,15 @@
-FROM golang:1.15.7
+FROM golang:1.16
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # Older versions of Go
 
-RUN GO111MODULE=on go get golang.org/dl/go1.14 && go1.14 download
+RUN go install golang.org/dl/go1.14@latest && go1.14 download
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.3.linux-amd64.tgz | tar  xvz
-RUN cp -i cockroach-v20.2.3.linux-amd64/cockroach /usr/local/bin/
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.5.linux-amd64.tgz | tar  xvz
+RUN cp -i cockroach-v20.2.5.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
@@ -48,20 +48,19 @@ RUN apt -y install /tmp/duplicati.deb
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.35.2
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.37.0
 
-RUN GO111MODULE=on go get \
-    # Linters formatters \
-    github.com/ckaznocha/protoc-gen-lint@v0.2.1 \
-    github.com/nilslice/protolock/cmd/protolock@v0.15.0 \
-    github.com/josephspurrier/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 \
-    github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 \
-    honnef.co/go/tools/cmd/staticcheck@2020.2.1 \
+# Linters formatters
+RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.1 && \
+    go install github.com/nilslice/protolock/cmd/protolock@v0.15.0 && \
+    go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
+    go install github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 && \
+    go install honnef.co/go/tools/cmd/staticcheck@2020.2.1 && \
     # Output formatters \
-    github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb \
-    github.com/axw/gocov/gocov@v1.0.0 \
-    github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 \
-    github.com/tailscale/depaware@e2f543bafb1d2b45d19324d0637453df76662408
+    go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
+    go install github.com/axw/gocov/gocov@v1.0.0  && \
+    go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 && \
+    go install github.com/tailscale/depaware@e2f543bafb1d2b45d19324d0637453df76662408
 
 RUN apt-get install -yq clang-format
 
