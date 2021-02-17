@@ -4,7 +4,7 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # Older versions of Go
 
-RUN GO111MODULE=on go get golang.org/dl/go1.14@latest && go1.14 download
+RUN go install golang.org/dl/go1.14@latest && go1.14 download
 
 # CockroachDB
 
