@@ -193,6 +193,10 @@ func foreachLine(data []byte, fn func(i int, line string) error) error {
 }
 
 func getModules(gitdir, modfile string) (map[string]module.Version, error) {
+	// execute returns unclear errors, so pre-check if file exists
+	if _, err := os.Stat(filepath.Join(gitdir, modfile)); os.IsNotExist(err) {
+		return map[string]module.Version{}, nil
+	}
 	moddir, modfile := filepath.Split(filepath.Join(gitdir, modfile))
 	data, err := execute(moddir, "go", "list", "-modfile", modfile, "-m", "all")
 	if err != nil {
