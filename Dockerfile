@@ -46,8 +46,15 @@ RUN apt-get -y install mono-devel
 RUN curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
 RUN apt -y install /tmp/duplicati.deb
 
-# Linters
+# Docker cli for being able to run sibling containers
+RUN apt-get install -y apt-transport-https lsb-release
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN echo \
+  "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+RUN apt-get update && apt-get install -y docker-ce-cli
 
+# Linters
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.37.0
 
 # Linters formatters
