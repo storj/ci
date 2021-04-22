@@ -11,7 +11,6 @@ import (
 	"go/types"
 	"io/ioutil"
 	"log"
-	"os"
 	"sort"
 	"strings"
 
@@ -23,8 +22,6 @@ var (
 		"gopkg.in/spacemonkeygo/monkit.v2":   {},
 		"github.com/spacemonkeygo/monkit/v3": {},
 	}
-
-	lockFilePerms = os.FileMode(0644)
 )
 
 func main() {
@@ -50,7 +47,7 @@ func main() {
 
 	outputStr := strings.Join(sortedNames, "\n")
 	if *output != "" {
-		if err := ioutil.WriteFile(*output, []byte(outputStr+"\n"), lockFilePerms); err != nil {
+		if err := ioutil.WriteFile(*output, []byte(outputStr+"\n"), 0644); err != nil {
 			log.Fatalf("error while writing to file %q: %s", *output, err)
 		}
 	} else {
@@ -164,17 +161,33 @@ func findLockedFnNames(pkg *packages.Package) []string {
 
 // isMonkitCall returns whether the node is a call to a function in the monkit package.
 func isMonkitCall(pkg *packages.Package, in ast.Node) bool {
-	defer func() { _ = recover() }() // TODO: do not use recover
+	call, ok := in.(*ast.CallExpr)
+	if !ok {
+		return false
+	}
+	fun, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return false
+	}
+	ident, ok := fun.X.(*ast.Ident)
+	if !ok {
+		return false
+	}
 
-	ident := in.(*ast.CallExpr).
-		Fun.(*ast.SelectorExpr).
-		X.(*ast.Ident)
+	tvar, ok := pkg.TypesInfo.Uses[ident].(*types.Var)
+	if !ok {
+		return false
+	}
+	tptr, ok := tvar.Type().(*types.Pointer)
+	if !ok {
+		return false
+	}
+	named, ok := tptr.Elem().(*types.Named)
+	if !ok {
+		return false
+	}
 
-	importPath := pkg.TypesInfo.Uses[ident].(*types.Var).
-		Type().(*types.Pointer).
-		Elem().(*types.Named).
-		Obj().Pkg().Path()
-
+	importPath := named.Obj().Pkg().Path()
 	_, match := monkitPaths[importPath]
 	return match
 }
