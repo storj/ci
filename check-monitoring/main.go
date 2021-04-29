@@ -11,7 +11,6 @@ import (
 	"go/types"
 	"io/ioutil"
 	"log"
-	"os"
 	"sort"
 	"strings"
 
@@ -23,8 +22,6 @@ var (
 		"gopkg.in/spacemonkeygo/monkit.v2":   {},
 		"github.com/spacemonkeygo/monkit/v3": {},
 	}
-
-	lockFilePerms = os.FileMode(0644)
 )
 
 func main() {
@@ -50,7 +47,7 @@ func main() {
 
 	outputStr := strings.Join(sortedNames, "\n")
 	if *output != "" {
-		if err := ioutil.WriteFile(*output, []byte(outputStr+"\n"), lockFilePerms); err != nil {
+		if err := ioutil.WriteFile(*output, []byte(outputStr+"\n"), 0644); err != nil {
 			log.Fatalf("error while writing to file %q: %s", *output, err)
 		}
 	} else {
@@ -59,9 +56,17 @@ func main() {
 }
 
 func findLockedFnNames(pkg *packages.Package) []string {
+	type posWithScope struct {
+		Scope string
+		Pos   token.Pos
+	}
+	type fnWithScope struct {
+		Scope string
+		Func  *ast.FuncDecl
+	}
 	var (
-		lockedTasksPos []token.Pos
-		lockedTaskFns  []*ast.FuncDecl
+		lockedTasksPos []posWithScope
+		lockedTaskFns  []fnWithScope
 		lockedFnInfos  []string
 	)
 
@@ -100,9 +105,11 @@ func findLockedFnNames(pkg *packages.Package) []string {
 			// We are already checking to ensure that these type assertions are valid in `isMonkitCall`.
 			sel := node.(*ast.CallExpr).Fun.(*ast.SelectorExpr)
 
+			scope := extractScopeName(pkg, sel)
+
 			// Track `mon.Task` calls.
 			if sel.Sel.Name == "Task" {
-				lockedTasksPos = append(lockedTasksPos, node.End())
+				lockedTasksPos = append(lockedTasksPos, posWithScope{Scope: scope, Pos: node.End()})
 				return true
 			}
 
@@ -116,7 +123,7 @@ func findLockedFnNames(pkg *packages.Package) []string {
 				return true
 			}
 			if argLiteral.Kind == token.STRING {
-				lockedFnInfo := pkg.PkgPath + "." + argLiteral.Value + " " + sel.Sel.Name
+				lockedFnInfo := scope + "." + argLiteral.Value + " " + sel.Sel.Name
 				lockedFnInfos = append(lockedFnInfos, lockedFnInfo)
 			}
 			return true
@@ -129,8 +136,8 @@ func findLockedFnNames(pkg *packages.Package) []string {
 				return true
 			}
 			for _, locked := range lockedTasksPos {
-				if fn.Pos() < locked && locked < fn.End() {
-					lockedTaskFns = append(lockedTaskFns, fn)
+				if fn.Pos() < locked.Pos && locked.Pos < fn.End() {
+					lockedTaskFns = append(lockedTaskFns, fnWithScope{Scope: locked.Scope, Func: fn})
 				}
 			}
 			return true
@@ -139,7 +146,8 @@ func findLockedFnNames(pkg *packages.Package) []string {
 	}
 
 	// Transform the ast.FuncDecls containing locked `mon.Task` calls to representative string.
-	for _, fn := range lockedTaskFns {
+	for _, sfn := range lockedTaskFns {
+		fn := sfn.Func
 		object := pkg.TypesInfo.Defs[fn.Name]
 
 		var receiver string
@@ -155,7 +163,7 @@ func findLockedFnNames(pkg *packages.Package) []string {
 			receiver += recvObj.Name()
 		}
 
-		lockedFnInfo := object.Pkg().Path() + receiver + "." + object.Name() + " Task"
+		lockedFnInfo := sfn.Scope + receiver + "." + object.Name() + " Task"
 		lockedFnInfos = append(lockedFnInfos, lockedFnInfo)
 
 	}
@@ -164,19 +172,89 @@ func findLockedFnNames(pkg *packages.Package) []string {
 
 // isMonkitCall returns whether the node is a call to a function in the monkit package.
 func isMonkitCall(pkg *packages.Package, in ast.Node) bool {
-	defer func() { _ = recover() }() // TODO: do not use recover
+	call, ok := in.(*ast.CallExpr)
+	if !ok {
+		return false
+	}
+	fun, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return false
+	}
+	ident, ok := fun.X.(*ast.Ident)
+	if !ok {
+		return false
+	}
 
-	ident := in.(*ast.CallExpr).
-		Fun.(*ast.SelectorExpr).
-		X.(*ast.Ident)
+	tvar, ok := pkg.TypesInfo.Uses[ident].(*types.Var)
+	if !ok {
+		return false
+	}
+	tptr, ok := tvar.Type().(*types.Pointer)
+	if !ok {
+		return false
+	}
+	named, ok := tptr.Elem().(*types.Named)
+	if !ok {
+		return false
+	}
 
-	importPath := pkg.TypesInfo.Uses[ident].(*types.Var).
-		Type().(*types.Pointer).
-		Elem().(*types.Named).
-		Obj().Pkg().Path()
-
+	importPath := named.Obj().Pkg().Path()
 	_, match := monkitPaths[importPath]
 	return match
+}
+
+func extractScopeName(pkg *packages.Package, sel *ast.SelectorExpr) (scopeName string) {
+	defer func() {
+		if scopeName == "" {
+			scopeName = pkg.PkgPath
+		}
+	}()
+
+	recvIdent, ok := sel.X.(*ast.Ident)
+	if !ok {
+		return ""
+	}
+	if recvIdent.Obj == nil || recvIdent.Obj.Decl == nil {
+		return ""
+	}
+	valueSpec, ok := recvIdent.Obj.Decl.(*ast.ValueSpec)
+	if !ok {
+		return ""
+	}
+
+	for _, value := range valueSpec.Values {
+		call, ok := value.(*ast.CallExpr)
+		if !ok {
+			continue
+		}
+
+		selExpr, ok := call.Fun.(*ast.SelectorExpr)
+		if !ok {
+			continue
+		}
+		if !isIdent(selExpr.X, "monkit") || selExpr.Sel.Name != "ScopeNamed" {
+			continue
+		}
+		if len(call.Args) != 1 {
+			continue
+		}
+
+		name, ok := call.Args[0].(*ast.BasicLit)
+		if !ok {
+			continue
+		}
+
+		return name.Value[1 : len(name.Value)-1]
+	}
+	return ""
+}
+
+func isIdent(x ast.Expr, name string) bool {
+	ident, ok := x.(*ast.Ident)
+	if !ok {
+		return false
+	}
+	return ident.Name == name
 }
 
 func sortAndUnique(input []string) (unique []string) {

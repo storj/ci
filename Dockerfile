@@ -43,7 +43,7 @@ RUN apt-get install -y duplicity python-pip && pip install boto
 
 # Duplicati backup tool for S3 gateway test scenarios
 RUN apt-get -y install mono-devel
-RUN curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.5.1-1_all.deb -o /tmp/duplicati.deb
+RUN curl -sfL https://github.com/duplicati/duplicati/releases/download/v2.0.5.114-2.0.5.114_canary_2021-03-10/duplicati_2.0.5.114-1_all.deb -o /tmp/duplicati.deb
 RUN apt -y install /tmp/duplicati.deb
 
 # Linters
