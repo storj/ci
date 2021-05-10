@@ -46,6 +46,9 @@ RUN apt-get -y install mono-devel
 RUN curl -sfL https://github.com/duplicati/duplicati/releases/download/v2.0.5.114-2.0.5.114_canary_2021-03-10/duplicati_2.0.5.114-1_all.deb -o /tmp/duplicati.deb
 RUN apt -y install /tmp/duplicati.deb
 
+# Requirements for UI tests
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install chromium xorg xvfb gtk2-engines-pixbuf dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable imagemagick x11-apps
+
 # Linters
 
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.37.0
