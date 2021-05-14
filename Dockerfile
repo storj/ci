@@ -52,19 +52,17 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install chromium xorg xvfb gtk2-
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.37.0
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.40.1
 
 # Linters formatters
 RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.1 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.15.0 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
-    go install github.com/loov/leakcheck@83e415ebc9b993a8a0443bb788b0f737a50c4b62 && \
-    go install honnef.co/go/tools/cmd/staticcheck@2020.2.1 && \
+    go install honnef.co/go/tools/cmd/staticcheck@2020.2.4 && \
     # Output formatters \
     go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
     go install github.com/axw/gocov/gocov@v1.0.0  && \
-    go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 && \
-    go install github.com/tailscale/depaware@e2f543bafb1d2b45d19324d0637453df76662408
+    go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
 
 RUN apt-get install -yq clang-format
 

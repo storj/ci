@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -388,7 +389,7 @@ func isGenerated(path string) bool {
 
 	var header [256]byte
 	n, err := file.Read(header[:])
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		fmt.Fprintf(os.Stderr, "failed to read %v: %v\n", path, err)
 		return false
 	}

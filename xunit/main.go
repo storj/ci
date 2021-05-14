@@ -202,12 +202,11 @@ func ProcessWithEcho(r io.Reader) (parse.Packages, error) {
 		if err != nil {
 			badLines++
 			if scan || badLines > 50 {
-				switch err.(type) {
-				case *json.SyntaxError:
+				var jserr *json.SyntaxError
+				if errors.As(err, &jserr) {
 					return nil, parse.ErrNotParseable
-				default:
-					return nil, err
 				}
+				return nil, err
 			}
 			continue
 		}

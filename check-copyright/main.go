@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -54,7 +55,7 @@ func main() {
 
 		var header [256]byte
 		n, err := file.Read(header[:])
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			fmt.Printf("failed to read %v: %v\n", path, err)
 			return nil
 		}
