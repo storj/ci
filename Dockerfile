@@ -49,7 +49,7 @@ RUN apt -y install /tmp/duplicati.deb
 
 # Requirements for UI tests
 RUN DEBIAN_FRONTEND="noninteractive" apt install -y chromium xorg xvfb gtk2-engines-pixbuf dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable imagemagick x11-apps
-RUN apt install -y brotli python3-pip && pip3 install selenium
+RUN apt install -y brotli
 
 # Linters
 
