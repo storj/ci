@@ -48,8 +48,7 @@ RUN curl -sfL https://github.com/duplicati/duplicati/releases/download/v2.0.5.11
 RUN apt -y install /tmp/duplicati.deb
 
 # Requirements for UI tests
-RUN DEBIAN_FRONTEND="noninteractive" apt install -y chromium xorg xvfb gtk2-engines-pixbuf dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable imagemagick x11-apps
-RUN apt install -y brotli
+RUN DEBIAN_FRONTEND="noninteractive" apt install -y brotli chromium xorg xvfb gtk2-engines-pixbuf dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable imagemagick x11-apps
 
 # Linters
 
