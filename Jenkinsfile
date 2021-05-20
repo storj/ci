@@ -31,6 +31,7 @@ def checkRepository(name, repo) {
                 sh 'check-atomic-align ./...'
                 sh 'check-errs ./...'
                 sh 'check-monkit ./...'
+                sh 'check-deferloop ./...'
                 sh 'staticcheck ./...'
                 // sh 'check-downgrades'
 
