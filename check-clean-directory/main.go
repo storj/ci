@@ -37,6 +37,11 @@ func main() {
 	leftover = ignorePrefix(leftover, "satellite/wasm/tests/node_modules/")
 	leftover = ignorePrefix(leftover, "satellite/wasm/tests/package-lock.json")
 
+	leftover = ignorePrefix(leftover, "web/multinode/node_modules/")
+	leftover = ignorePrefix(leftover, "web/multinode/coverage/")
+	leftover = ignorePrefix(leftover, "web/multinode/dist/")
+	leftover = ignorePrefix(leftover, "web/multinode/package-lock.json")
+
 	if len(leftover) != 0 {
 		fmt.Println("Files left-over after running tests:")
 		for _, file := range leftover {
