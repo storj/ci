@@ -33,7 +33,8 @@ var osarches = []OsArch{
 }
 
 var (
-	components string
+	components   string
+	skipOsArches string
 )
 
 // Env contains all necessary environment settings for the build.
@@ -61,6 +62,7 @@ func main() {
 	flag.StringVar(&env.BranchName, "branch", "", "branch name to use for tagging")
 	flag.StringVar(&components, "components", "", "comma separated list of components to build within the repo")
 	flag.StringVar(&env.GoVersion, "go-version", "", "go version to use for building the image")
+	flag.StringVar(&skipOsArches, "skip-osarches", "", "comma-separated list of os/arch to skip build for")
 
 	flag.Parse()
 
@@ -143,8 +145,14 @@ func (env *Env) BuildComponents(components []string) error {
 		return fmt.Errorf("failed to create tagdir %q: %w", tagDir, err)
 	}
 
+	skippedOsArches := make(map[string]struct{})
+
+	for _, s := range strings.Split(skipOsArches, ",") {
+		skippedOsArches[s] = struct{}{}
+	}
+
 	for _, component := range components {
-		err := env.BuildComponent(tagDir, component)
+		err := env.BuildComponent(tagDir, component, skippedOsArches)
 		if err != nil {
 			return fmt.Errorf("failed component %q: %w", component, err)
 		}
@@ -153,8 +161,12 @@ func (env *Env) BuildComponents(components []string) error {
 }
 
 // BuildComponent builds the binaries for the different OsArch's for the specified component.
-func (env *Env) BuildComponent(tagdir, component string) error {
+func (env *Env) BuildComponent(tagdir, component string, skippedOsArches map[string]struct{}) error {
 	for _, osarch := range osarches {
+		if _, ok := skippedOsArches[fmt.Sprintf("%s/%s", osarch.Os, osarch.Arch)]; ok {
+			env.Log.Printf("Skipped build for %v", osarch)
+			continue
+		}
 		if err := env.BuildComponentBinary(tagdir, component, osarch); err != nil {
 			return fmt.Errorf("failed osarch %q: %w", osarch, err)
 		}
