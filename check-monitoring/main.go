@@ -113,9 +113,9 @@ func findLockedFnNames(pkg *packages.Package) []string {
 				return true
 			}
 
-			// Track other monkit calls that have one string argument (e.g. monkit.FloatVal, etc.)
-			// and transform them to representative string.
-			if len(node.(*ast.CallExpr).Args) != 1 {
+			// Track other monkit calls that have one or more argument (e.g. monkit.FloatVal, etc.)
+			// and transform the first arg to the representative string.
+			if len(node.(*ast.CallExpr).Args) < 1 {
 				return true
 			}
 			argLiteral, ok := node.(*ast.CallExpr).Args[0].(*ast.BasicLit)
