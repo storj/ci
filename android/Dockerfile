@@ -1,4 +1,4 @@
-FROM golang:1.14.6
+FROM golang:rc
 
 # Postgres
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
