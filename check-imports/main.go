@@ -9,11 +9,11 @@ import (
 	"flag"
 	"fmt"
 	"go/ast"
+	"go/parser"
 	"go/token"
 	"io"
 	"os"
 	"reflect"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -47,28 +47,14 @@ func main() {
 		buildFlags = append(buildFlags, "-race")
 	}
 
-	mode := packages.NeedName |
-		packages.NeedFiles |
-		packages.NeedCompiledGoFiles |
-		packages.NeedImports |
-		packages.NeedTypes |
-		packages.NeedSyntax |
-		packages.NeedDeps
-
 	roots, err := packages.Load(&packages.Config{
-		Mode:       mode,
-		Env:        os.Environ(),
+		Mode:       packages.NeedName | packages.NeedFiles,
 		BuildFlags: buildFlags,
 		Tests:      true,
 	}, pkgNames...)
-
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("checking import order:")
-
-	makeStdList(roots)
 
 	pkgs := roots
 	if *withdeps {
@@ -136,10 +122,19 @@ func verifyPackage(stderr io.Writer, pkg *packages.Package) (misgrouped, unsorte
 		return nil, nil
 	}
 
-	for i, file := range pkg.Syntax {
-		path := pkg.CompiledGoFiles[i]
+	fset := token.NewFileSet()
+	var files []*ast.File
+	for _, path := range pkg.GoFiles {
+		file, err := parser.ParseFile(fset, path, nil, parser.ImportsOnly)
+		if err != nil {
+			panic(err)
+		}
+		files = append(files, file)
+	}
 
-		imports := LoadImports(pkg.Fset, path, file)
+	for i, path := range pkg.GoFiles {
+		file := files[i]
+		imports := LoadImports(fset, path, file)
 
 		ordered := true
 		sorted := true
@@ -268,8 +263,15 @@ func ClassifyImport(pkgPath string) Class {
 	if strings.HasPrefix(pkgPath, "storj.io/") {
 		return Storj
 	}
-	if stdlib[pkgPath] {
-		return Standard
+	// https://github.com/golang/go/blob/master/src/cmd/go/internal/search/search.go#L554
+	{
+		i := strings.Index(pkgPath, "/")
+		if i < 0 {
+			i = len(pkgPath)
+		}
+		if !strings.Contains(pkgPath[:i], ".") {
+			return Standard
+		}
 	}
 	return Other
 }
@@ -339,40 +341,6 @@ func LoadImports(fset *token.FileSet, name string, f *ast.File) Imports {
 	}
 
 	return imports
-}
-
-var root = runtime.GOROOT()
-var stdlib = map[string]bool{}
-
-func makeStdList(roots []*packages.Package) {
-	seen := map[*packages.Package]bool{}
-	var visit func(*packages.Package)
-	visit = func(p *packages.Package) {
-		if seen[p] {
-			return
-		}
-		includeStd(p)
-
-		seen[p] = true
-		for _, pkg := range p.Imports {
-			visit(pkg)
-		}
-	}
-
-	for _, pkg := range roots {
-		visit(pkg)
-	}
-}
-
-func includeStd(p *packages.Package) {
-	if len(p.GoFiles) == 0 {
-		stdlib[p.ID] = true
-		return
-	}
-	if strings.HasPrefix(p.GoFiles[0], root) {
-		stdlib[p.ID] = true
-		return
-	}
 }
 
 func isGenerated(path string) bool {
