@@ -1,4 +1,4 @@
-FROM golang:1.16
+FROM golang:1.16.6
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -8,8 +8,8 @@ RUN go install golang.org/dl/go1.14@latest && go1.14 download
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v20.2.5.linux-amd64.tgz | tar  xvz
-RUN cp -i cockroach-v20.2.5.linux-amd64/cockroach /usr/local/bin/
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v21.1.5.linux-amd64.tgz | tar  xvz
+RUN cp -i cockroach-v21.1.5.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
@@ -52,7 +52,7 @@ RUN DEBIAN_FRONTEND="noninteractive" apt install -y brotli chromium xorg xvfb gt
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.40.1
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.41.1
 
 # Linters formatters
 RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.1 && \
