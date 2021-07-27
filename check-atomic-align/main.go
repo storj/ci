@@ -18,8 +18,24 @@ import (
 var exit int
 
 func main() {
-	// load up the requested packages
+	// load imports of requested packages to filter out any
+	// that do not import sync/atomic
 	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.NeedImports,
+	}, os.Args[1:]...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var imports []string
+	for _, pkg := range pkgs {
+		if _, ok := pkg.Imports["sync/atomic"]; ok {
+			imports = append(imports, pkg.PkgPath)
+		}
+	}
+
+	// load up the requested packages
+	pkgs, err = packages.Load(&packages.Config{
 		Mode: 0 |
 			packages.NeedTypes |
 			packages.NeedTypesInfo |
@@ -27,7 +43,7 @@ func main() {
 			packages.NeedSyntax |
 			packages.NeedImports |
 			packages.NeedName,
-	}, os.Args[1:]...)
+	}, imports...)
 	if err != nil {
 		log.Fatal(err)
 	}
