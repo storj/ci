@@ -7,6 +7,14 @@ It contains:
 * setup for tools,
 * setup for database.
 
+On push of commits to `main`, a Docker image is built and pushed to Docker Hub
+at `storjlabs/ci:latest`.
+
+Using this CI image is possible by either `docker.build` in a repo Jenkinsfile
+or pulling `storjlabs/ci:latest` image. It's recommended to pull the image, and
+only use `docker.build` if you need to test a change in a PR/branch before the
+change is merged into main, then switch back to pulling the image.
+
 ## Update Process
 Updates to linters or Go version in any storj repo should originate here.
 
@@ -22,6 +30,7 @@ Updates to linters or Go version in any storj repo should originate here.
 2. Make PRs in all other repos to:
    a. Use new Go version
    b. Use the branch in storj/ci for `docker.build` around line 5 of their Jenkinsfile.
+      e.g. `docker.build("storj-ci", "--pull git://github.com/storj/ci.git#mybranch")`
 3. After those PRs pass (not merged), merge PR in storj/ci
 4. Remove branch change in all of the other PRs, they should still pass
 5. Merge those PRs
