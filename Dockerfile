@@ -1,4 +1,4 @@
-FROM golang:1.16.6
+FROM golang:1.17.0
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -8,25 +8,25 @@ RUN go install golang.org/dl/go1.14@latest && go1.14 download
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v21.1.5.linux-amd64.tgz | tar  xvz
-RUN cp -i cockroach-v21.1.5.linux-amd64/cockroach /usr/local/bin/
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v21.1.7.linux-amd64.tgz | tar  xvz
+RUN cp -i cockroach-v21.1.7.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
 RUN curl -sf https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
 RUN curl -sfL https://deb.nodesource.com/setup_14.x  | bash -
 
-RUN apt-get update && apt-get install -y -qq postgresql-12 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
+RUN apt-get update && apt-get install -y -qq postgresql-13 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
 
-RUN rm /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'local   all             all                                     trust' >> /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'host    all             all             127.0.0.1/8             trust' >> /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'host    all             all            ::0/0                   trust' >> /etc/postgresql/12/main/pg_hba.conf;
+RUN rm /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'local   all             all                                     trust' >> /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'host    all             all             127.0.0.1/8             trust' >> /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'host    all             all            ::0/0                   trust' >> /etc/postgresql/13/main/pg_hba.conf;
 
-RUN echo 'max_connections = 1000' >> /etc/postgresql/12/main/conf.d/connectionlimits.conf; \
-    echo 'fsync = off' >> /etc/postgresql/12/main/conf.d/nosync.conf;
+RUN echo 'max_connections = 1000' >> /etc/postgresql/13/main/conf.d/connectionlimits.conf; \
+    echo 'fsync = off' >> /etc/postgresql/13/main/conf.d/nosync.conf;
 
 # Tooling
 
@@ -40,7 +40,7 @@ RUN curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.1
 RUN apt-get install -y default-jre
 
 # Duplicity backup tool for S3 gateway test scenarios
-RUN apt-get install -y duplicity python-pip && pip install boto
+RUN apt-get install -y duplicity python3-pip && pip install boto3
 
 # Duplicati backup tool for S3 gateway test scenarios
 RUN apt-get -y install mono-devel
@@ -52,13 +52,13 @@ RUN DEBIAN_FRONTEND="noninteractive" apt install -y brotli chromium xorg xvfb gt
 
 # Linters
 
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.41.1
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.42.0
 
 # Linters formatters
 RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.1 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.15.0 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
-    go install honnef.co/go/tools/cmd/staticcheck@2021.1 && \
+    go install honnef.co/go/tools/cmd/staticcheck@2021.1.1 && \
     # Output formatters \
     go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
     go install github.com/axw/gocov/gocov@v1.0.0  && \
