@@ -40,7 +40,7 @@ RUN curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.1
 RUN apt-get install -y default-jre
 
 # Duplicity backup tool for S3 gateway test scenarios
-RUN apt-get install -y duplicity python3-pip && pip install boto
+RUN apt-get install -y duplicity python3-pip && pip install boto3
 
 # Duplicati backup tool for S3 gateway test scenarios
 RUN apt-get -y install mono-devel
