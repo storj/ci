@@ -52,6 +52,9 @@ RUN DEBIAN_FRONTEND="noninteractive" apt install -y brotli chromium xorg xvfb gt
 
 # Linters
 
+# Shellcheck for linting shell scripts
+RUN apt-get -y install shellcheck
+
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.42.0
 
 # Linters formatters
