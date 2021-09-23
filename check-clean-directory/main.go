@@ -28,6 +28,8 @@ func main() {
 	leftover = ignorePrefix(leftover, "web/satellite/coverage/")
 	leftover = ignorePrefix(leftover, "web/satellite/dist/")
 	leftover = ignorePrefix(leftover, "web/satellite/package-lock.json")
+	leftover = ignorePrefix(leftover, "web/satellite/static/wasm/access.wasm")
+	leftover = ignorePrefix(leftover, "web/satellite/static/wasm/wasm_exec.js")
 
 	leftover = ignorePrefix(leftover, "web/storagenode/node_modules/")
 	leftover = ignorePrefix(leftover, "web/storagenode/coverage/")
