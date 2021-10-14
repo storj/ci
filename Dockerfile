@@ -15,7 +15,7 @@ RUN cp -i cockroach-v21.1.7.linux-amd64/cockroach /usr/local/bin/
 
 RUN curl -sf https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
-RUN curl -sfL https://deb.nodesource.com/setup_14.x  | bash -
+RUN curl -sfL https://deb.nodesource.com/setup_16.x  | bash -
 
 RUN apt-get update && apt-get install -y -qq postgresql-13 redis-server unzip libuv1-dev libjson-c-dev nettle-dev nodejs
 
