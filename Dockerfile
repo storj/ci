@@ -1,4 +1,4 @@
-FROM golang:1.17.0
+FROM golang:1.17.2
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
