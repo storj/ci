@@ -8,8 +8,8 @@ RUN go install golang.org/dl/go1.14@latest && go1.14 download
 
 # CockroachDB
 
-RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v21.1.7.linux-amd64.tgz | tar  xvz
-RUN cp -i cockroach-v21.1.7.linux-amd64/cockroach /usr/local/bin/
+RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v21.1.10.linux-amd64.tgz | tar  xvz
+RUN cp -i cockroach-v21.1.10.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
