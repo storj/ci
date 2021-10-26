@@ -65,23 +65,15 @@ RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.1 && \
     # Output formatters \
     go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
     go install github.com/axw/gocov/gocov@v1.0.0  && \
-    go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180
+    go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 && \
+    go install github.com/google/go-licenses@ceb292363ec84358c9a276ef23aa0de893e59b84
 
 RUN apt-get install -yq clang-format
-
-# Install go-licenses
-#
-# NOTE: It requires its own go path because it uses db files from the licenses
-# go module.
-RUN mkdir -p /ci/go-licenses && \
-    GO111MODULE=on GOPATH=/ci/go-licenses go get \
-    github.com/google/go-licenses@2ee7a02f6ae4f78b6b2d6ef421cedadbeabe2a89
-ENV PATH "$PATH:/ci/go-licenses/bin"
 
 # Tools in this repository
 COPY . /go/ci
 WORKDIR /go/ci
-RUN go install ...
+RUN go install ./...
 
 # Reset to starting directory
 WORKDIR /go
