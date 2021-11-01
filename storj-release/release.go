@@ -254,10 +254,10 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		// embed version information
 		"go", "build", "-o", filepath.ToSlash(binaryPath),
 		"-ldflags",
-		fmt.Sprintf("-X storj.io/storj/private/version.buildTimestamp=%d ", env.Commit.Timestamp.UnixNano())+
-			fmt.Sprintf("-X storj.io/storj/private/version.buildCommitHash=%s ", env.Commit.Hash)+
-			fmt.Sprintf("-X storj.io/storj/private/version.buildVersion=%s ", env.Commit.Version.String())+
-			fmt.Sprintf("-X storj.io/storj/private/version.buildRelease=%t ", env.Commit.Release), "./"+component,
+		fmt.Sprintf("-X storj.io/private/version.buildTimestamp=%d ", env.Commit.Timestamp.UnixNano())+
+			fmt.Sprintf("-X storj.io/private/version.buildCommitHash=%s ", env.Commit.Hash)+
+			fmt.Sprintf("-X storj.io/private/version.buildVersion=%s ", env.Commit.Version.String())+
+			fmt.Sprintf("-X storj.io/private/version.buildRelease=%t ", env.Commit.Release), "./"+component,
 	)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 	if err := cmd.Run(); err != nil {
