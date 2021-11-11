@@ -36,6 +36,7 @@ func main() {
 	leftover = ignorePrefix(leftover, "web/storagenode/dist/")
 	leftover = ignorePrefix(leftover, "web/storagenode/package-lock.json")
 
+	leftover = ignorePrefix(leftover, "satellite/admin/ui/node_modules/")
 	leftover = ignorePrefix(leftover, "satellite/wasm/tests/node_modules/")
 	leftover = ignorePrefix(leftover, "satellite/wasm/tests/package-lock.json")
 
