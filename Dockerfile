@@ -36,8 +36,6 @@ ENV PATH "$PATH:/root/bin"
 
 RUN curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protoc-3.12.3-linux-x86_64.zip -o /tmp/protoc.zip && unzip /tmp/protoc.zip -d "$HOME"/protoc
 
-RUN go install github.com/magefile/mage@v1.11.0
-
 # Android/Java binding tests
 RUN apt-get install -y default-jre
 
@@ -59,7 +57,7 @@ RUN apt-get -y install shellcheck
 
 RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ${GOPATH}/bin v1.42.0
 
-# Linters formatters
+# Linters, formatters, build tools
 RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.1 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.15.0 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
@@ -68,7 +66,8 @@ RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.1 && \
     go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
     go install github.com/axw/gocov/gocov@v1.0.0  && \
     go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 && \
-    go install github.com/google/go-licenses@ceb292363ec84358c9a276ef23aa0de893e59b84
+    go install github.com/google/go-licenses@ceb292363ec84358c9a276ef23aa0de893e59b84 && \
+    go install github.com/magefile/mage@v1.11.0
 
 RUN apt-get install -yq clang-format
 
