@@ -59,7 +59,7 @@ RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.s
 
 # Linters, formatters, build tools
 RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.4 && \
-    go install github.com/nilslice/protolock/cmd/protolock@v0.15.q && \
+    go install github.com/nilslice/protolock/cmd/protolock@v0.15.2 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
     go install honnef.co/go/tools/cmd/staticcheck@2021.1.2 && \
     # Output formatters \
