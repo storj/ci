@@ -30,7 +30,7 @@ linters:
     - nakedret                # check for naked returns
     - nilerr                  # checks for misuses of `if err != nil { return nil }`
     - noctx                   # finds locations that should use context
-    - nolintlint              # checks that nolint directives are correct
+    #TMP DISABLE - nolintlint # checks that nolint directives are correct
     - revive                  # check standard linting rules
     - staticcheck             # comprehensive checks
     - structcheck             # check for unused struct parameters
