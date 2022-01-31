@@ -159,10 +159,16 @@ func check(olddir, newdir, modfile string, allowlist map[string]struct{}) (probl
 		case -1: // downgrade
 			emit("vvv", "downgrade", path, oldMod.Version, newMod.Version)
 			if _, ok := allowlist[path]; !ok {
-				problems = append(problems, fmt.Sprintf(
-					"%s: %s was downgraded: if intended, add \"Downgrade: %s\" to commit message",
-					modfile, path, path,
-				))
+				direct, err := directDependency(newdir, modfile, path)
+				if err != nil {
+					return nil, errs.Wrap(err)
+				}
+				if direct {
+					problems = append(problems, fmt.Sprintf(
+						"%s: %s was downgraded: if intended, add \"Downgrade: %s\" to commit message",
+						modfile, path, path,
+					))
+				}
 			}
 		}
 	}
@@ -261,4 +267,17 @@ func parseAllowlist(data []byte) (map[string]struct{}, error) {
 		return nil
 	})
 	return out, err
+}
+
+func directDependency(gitdir, modfile, path string) (bool, error) {
+	// execute returns unclear errors, so pre-check if file exists
+	if _, err := os.Stat(filepath.Join(gitdir, modfile)); os.IsNotExist(err) {
+		return false, errs.New("module file missing")
+	}
+	moddir, modfile := filepath.Split(filepath.Join(gitdir, modfile))
+	data, err := execute(moddir, "go", "mod", "why", "-modfile", modfile, "-m", path)
+	if err != nil {
+		return false, errs.Wrap(err)
+	}
+	return !bytes.Contains(data, []byte("main module does not need module")), nil
 }
