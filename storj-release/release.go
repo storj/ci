@@ -239,6 +239,8 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 	}
 
 	cmd := exec.Command("docker", "run", "--rm",
+		// don't build as root
+		"-u", "$(id -u):$(id -g)",
 		// setup build folder
 		"-v", env.WorkDir+":/go/build",
 		"-w", "/go/build",
