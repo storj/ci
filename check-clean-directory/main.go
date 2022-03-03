@@ -4,55 +4,36 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 )
 
 func main() {
-	cmd := exec.Command("git", "ls-files", ".", "--others")
+	cmd := exec.Command("git", "ls-files", ".", "--others", "--exclude-standard")
 
-	out, err := cmd.Output()
+	var stdout bytes.Buffer
+	cmd.Stdout = io.MultiWriter(&stdout, os.Stdout)
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Checking left-over files failed.")
-		fmt.Println(err)
+		fmt.Println("Checking left-over files failed.", err)
 		os.Exit(1)
 	}
 
-	leftover := strings.Split(strings.TrimSpace(string(out)), "\n")
-	leftover = ignorePrefix(leftover, ".build")
-
-	// there's no easy way to modify npm to use tmp folders
-	leftover = ignorePrefix(leftover, "web/satellite/node_modules/")
-	leftover = ignorePrefix(leftover, "web/satellite/coverage/")
-	leftover = ignorePrefix(leftover, "web/satellite/dist/")
-	leftover = ignorePrefix(leftover, "web/satellite/package-lock.json")
-	leftover = ignorePrefix(leftover, "web/satellite/static/wasm/access.wasm")
-	leftover = ignorePrefix(leftover, "web/satellite/static/wasm/wasm_exec.js")
-
-	leftover = ignorePrefix(leftover, "web/storagenode/node_modules/")
-	leftover = ignorePrefix(leftover, "web/storagenode/coverage/")
-	leftover = ignorePrefix(leftover, "web/storagenode/dist/")
-	leftover = ignorePrefix(leftover, "web/storagenode/package-lock.json")
-
-	leftover = ignorePrefix(leftover, "satellite/admin/ui/node_modules/")
-	leftover = ignorePrefix(leftover, "satellite/wasm/tests/node_modules/")
-	leftover = ignorePrefix(leftover, "satellite/wasm/tests/package-lock.json")
-
-	leftover = ignorePrefix(leftover, "web/multinode/node_modules/")
-	leftover = ignorePrefix(leftover, "web/multinode/coverage/")
-	leftover = ignorePrefix(leftover, "web/multinode/dist/")
-	leftover = ignorePrefix(leftover, "web/multinode/package-lock.json")
+	leftover := skipEmpty(strings.Split(stdout.String(), "\n"))
 
 	if len(leftover) != 0 {
-		fmt.Println("Files left-over after running tests:")
-		for _, file := range leftover {
-			fmt.Println(file)
-		}
+		fmt.Println("Files left-over after running tests.")
 		os.Exit(1)
 	}
 }
+
+var _ = ignorePrefix // we may need this in the future
 
 func ignorePrefix(files []string, dir string) []string {
 	result := files[:0]
@@ -61,6 +42,17 @@ func ignorePrefix(files []string, dir string) []string {
 			continue
 		}
 		if strings.HasPrefix(file, dir) {
+			continue
+		}
+		result = append(result, file)
+	}
+	return result
+}
+
+func skipEmpty(files []string) []string {
+	result := files[:0]
+	for _, file := range files {
+		if file == "" {
 			continue
 		}
 		result = append(result, file)
