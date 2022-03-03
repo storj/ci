@@ -6,59 +6,62 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
-var ignoreFolder = map[string]bool{
-	".build":       true,
-	".git":         true,
-	"node_modules": true,
-	"coverage":     true,
-	"dist":         true,
-	"dbx":          true,
-}
-
-var ignoreFile = map[string]bool{
-	"package-lock.json": true,
-	"icon.go":           true,
+var ignoreFile = map[string]struct{}{
+	"package-lock.json": {},
+	"icon.go":           {},
 }
 
 // Size constants.
 const (
-	KB = 1 << 10
+	fileSizeLimit = 650 * KB
+	KB            = 1 << 10
 )
 
 func main() {
-	const fileSizeLimit = 650 * KB
+	cmd := exec.Command("git", "ls-files")
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "running \"git ls-files\" failed:\n")
+		fmt.Fprintf(os.Stderr, "\t%v\n", err)
+		os.Exit(1)
+	}
 
 	var failed int
+	committedFiles := strings.Split(string(out), "\n")
+	for _, path := range committedFiles {
+		if path == "" {
+			continue
+		}
 
-	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+		base := filepath.Base(path)
+		if _, ok := ignoreFile[base]; ok {
+			continue
+		}
+		if strings.Contains(base, ".dbx.") {
+			continue
+		}
+
+		info, err := os.Stat(path)
 		if err != nil {
-			fmt.Println(err)
-			return nil
-		}
-		if info.IsDir() && ignoreFolder[info.Name()] {
-			return filepath.SkipDir
-		}
-		if !info.IsDir() && ignoreFile[info.Name()] {
-			return nil
+			failed++
+			fmt.Fprintf(os.Stderr, "failed to stat %q: %v\n", path, err)
+			continue
 		}
 
 		size := info.Size()
 		if size > fileSizeLimit {
 			failed++
-			fmt.Printf("%v (%vKB)\n", path, size/KB)
+			fmt.Fprintf(os.Stderr, "%v (%vKB)\n", path, size/KB)
 		}
-
-		return nil
-	})
-	if err != nil {
-		fmt.Println(err)
 	}
 
 	if failed > 0 {
-		fmt.Printf("some files were over size limit %v\n", fileSizeLimit)
+		fmt.Fprintf(os.Stderr, "some files were over size limit %v\n", fileSizeLimit)
 		os.Exit(1)
 	}
 }
