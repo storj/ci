@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blang/semver"
+	"github.com/blang/semver/v4"
 )
 
 // OsArch creates a easy map of OS and Arch combinations.

@@ -3,7 +3,7 @@ module github.com/storj/ci
 go 1.17
 
 require (
-	github.com/blang/semver v3.5.1+incompatible
+	github.com/blang/semver/v4 v4.0.0
 	github.com/mfridman/tparse v0.7.4
 	github.com/stretchr/testify v1.7.0
 	github.com/zeebo/errs v1.3.0
