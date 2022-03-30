@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
@@ -35,7 +36,9 @@ var osarches = []OsArch{
 
 var (
 	components   string
+	buildName    string
 	skipOsArches string
+	buildTags    string
 )
 
 // Env contains all necessary environment settings for the build.
@@ -52,8 +55,9 @@ type Env struct {
 		Release   bool
 	}
 
-	GoVersion string
-	GOPATH    string
+	GoVersion  string
+	GOPATH     string
+	CGOENABLED string
 }
 
 func main() {
@@ -62,7 +66,10 @@ func main() {
 	flag.StringVar(&env.ReleaseDir, "release-dir", "release", "release directory")
 	flag.StringVar(&env.BranchName, "branch", "", "branch name to use for tagging")
 	flag.StringVar(&components, "components", "", "comma separated list of components to build within the repo")
+	flag.StringVar(&buildName, "build-name", "", "build name if building root of repo instead of providing a component list")
 	flag.StringVar(&env.GoVersion, "go-version", "", "go version to use for building the image")
+	flag.StringVar(&buildTags, "build-tags", "", "build tags")
+
 	flag.StringVar(&skipOsArches, "skip-osarches", "", "comma-separated list of os/arch to skip build for")
 
 	flag.Parse()
@@ -75,12 +82,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	gopath, err := exec.Command("go", "env", "GOPATH").CombinedOutput()
+	gopath, err := getGoEnv("GOPATH")
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed to get GOPATH: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "failed to get GOPATH from env: %v\n", err)
 		os.Exit(1)
 	}
-	env.GOPATH = strings.TrimSpace(string(gopath))
+	env.GOPATH = gopath
+
+	cgoEnabled, err := getGoEnv("CGO_ENABLED")
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "failed to get CGO_ENABLED from env: %v\n", err)
+		os.Exit(1)
+	}
+	env.CGOENABLED = cgoEnabled
 
 	err = env.FetchVersionInfo()
 	if err != nil {
@@ -95,6 +109,23 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to build: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// getGoEnv attempts to get a particular Go environment variable. First it checks
+// if the environment variable exists in the OS, and returns that if it exists.
+// failing that, it attempts to find it using the `go env` command.
+func getGoEnv(name string) (string, error) {
+	env := strings.TrimSpace(os.Getenv(name))
+	if env != "" {
+		return env, nil
+	}
+
+	value, err := exec.Command("go", "env", name).CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimSpace(string(value)), nil
 }
 
 // FetchVersionInfo gets the version information from the git tag.
@@ -177,7 +208,13 @@ func (env *Env) BuildComponent(tagdir, component string, skippedOsArches map[str
 
 // BuildComponentBinary builds the actual binary for specified component on OsArch.
 func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) error {
-	binaryName := filepath.Base(component) + "_" + osarch.Os + "_" + osarch.Arch
+	name := filepath.Base(component)
+	if component == "" {
+		// if no component, we're building the root of the repo.
+		name = buildName
+	}
+
+	binaryName := name + "_" + osarch.Os + "_" + osarch.Arch
 	if osarch.Os == "windows" {
 		binaryName += ".exe"
 	}
@@ -238,29 +275,47 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		}
 	}
 
-	cmd := exec.Command("docker", "run", "--rm",
+	user, err := user.Current()
+	if err != nil {
+		return fmt.Errorf("could not get current user: %w", err)
+	}
+
+	runArgs := []string{
+		"run", "--rm",
 		// don't build as root
-		"-u", "$(id -u):$(id -g)",
+		"-u", user.Uid + ":" + user.Gid,
 		// setup build folder
-		"-v", env.WorkDir+":/go/build",
+		"-v", env.WorkDir + ":/go/build",
 		"-w", "/go/build",
 		// use a shared package cache to avoid downloading
-		"-v", filepath.Join(env.GOPATH, "pkg")+":/go/pkg",
+		"-v", filepath.Join(env.GOPATH, "pkg") + ":/go/pkg",
 		// setup correct os/arch
-		"-e", "GOOS="+osarch.Os, "-e", "GOARCH="+osarch.Arch,
-		"-e", "GOARM=6", "-e", "CGO_ENABLED=1",
+		"-e", "GOOS=" + osarch.Os, "-e", "GOARCH=" + osarch.Arch,
+		"-e", "GOARM=6", "-e", "CGO_ENABLED=" + env.CGOENABLED,
 		// use goproxy
 		"-e", "GOPROXY",
 		// use our golang image
-		"storjlabs/golang:"+env.GoVersion,
-		// embed version information
+		"storjlabs/golang:" + env.GoVersion,
+	}
+
+	buildArgs := []string{
 		"go", "build", "-o", filepath.ToSlash(binaryPath),
-		"-ldflags",
+	}
+	if buildTags != "" {
+		buildArgs = append(buildArgs, "-tags", buildTags)
+	}
+
+	// embed version information
+	buildArgs = append(buildArgs, "-ldflags",
 		fmt.Sprintf("-X storj.io/private/version.buildTimestamp=%d ", env.Commit.Timestamp.UnixNano())+
 			fmt.Sprintf("-X storj.io/private/version.buildCommitHash=%s ", env.Commit.Hash)+
 			fmt.Sprintf("-X storj.io/private/version.buildVersion=%s ", env.Commit.Version.String())+
 			fmt.Sprintf("-X storj.io/private/version.buildRelease=%t ", env.Commit.Release), "./"+component,
 	)
+
+	runArgs = append(runArgs, buildArgs...)
+
+	cmd := exec.Command("docker", runArgs...)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("build failed: %w", err)
