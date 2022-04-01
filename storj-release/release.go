@@ -18,6 +18,10 @@ import (
 	"github.com/blang/semver/v4"
 )
 
+const defaultCGOEnabled = "1"
+
+var defaultPackageCachePath = filepath.Join(os.TempDir(), "go-pkg")
+
 // OsArch creates a easy map of OS and Arch combinations.
 type OsArch struct {
 	Os   string
@@ -55,9 +59,9 @@ type Env struct {
 		Release   bool
 	}
 
-	GoVersion  string
-	GOPATH     string
-	CGOENABLED string
+	GoVersion        string
+	PackageCachePath string
+	CGOENABLED       string
 }
 
 func main() {
@@ -84,17 +88,19 @@ func main() {
 
 	gopath, err := getGoEnv("GOPATH")
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed to get GOPATH from env: %v\n", err)
-		os.Exit(1)
+		fmt.Println("could not find GOPATH, defaulting to", defaultPackageCachePath, "for package cache")
+		env.PackageCachePath = defaultPackageCachePath
+	} else {
+		env.PackageCachePath = filepath.Join(gopath, "pkg")
 	}
-	env.GOPATH = gopath
 
 	cgoEnabled, err := getGoEnv("CGO_ENABLED")
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed to get CGO_ENABLED from env: %v\n", err)
-		os.Exit(1)
+		fmt.Println("could not find CGO_ENABLED, defaulting to", defaultCGOEnabled)
+		env.CGOENABLED = defaultCGOEnabled
+	} else {
+		env.CGOENABLED = cgoEnabled
 	}
-	env.CGOENABLED = cgoEnabled
 
 	err = env.FetchVersionInfo()
 	if err != nil {
@@ -288,7 +294,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		"-v", env.WorkDir + ":/go/build",
 		"-w", "/go/build",
 		// use a shared package cache to avoid downloading
-		"-v", filepath.Join(env.GOPATH, "pkg") + ":/go/pkg",
+		"-v", env.PackageCachePath + ":/go/pkg",
 		// setup correct os/arch
 		"-e", "GOOS=" + osarch.Os, "-e", "GOARCH=" + osarch.Arch,
 		"-e", "GOARM=6", "-e", "CGO_ENABLED=" + env.CGOENABLED,
