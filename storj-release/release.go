@@ -255,7 +255,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		args = append(args,
 			"-o", resourcesyso,
 			"-original-name", binaryName,
-			"-description", filepath.Base(component)+" program for Storj",
+			"-description", name+" program for Storj",
 			"-product-ver-major", fmt.Sprintf("%d", env.Commit.Version.Major),
 			"-ver-major", fmt.Sprintf("%d", env.Commit.Version.Major),
 			"-product-ver-minor", fmt.Sprintf("%d", env.Commit.Version.Minor),
