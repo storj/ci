@@ -62,6 +62,7 @@ type Env struct {
 	GoVersion        string
 	PackageCachePath string
 	CGOENABLED       string
+	LDFLAGS          string
 }
 
 func main() {
@@ -85,6 +86,8 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to get working directory: %v\n", err)
 		os.Exit(1)
 	}
+
+	env.LDFLAGS = strings.TrimSpace(os.Getenv("LDFLAGS"))
 
 	gopath, err := getGoEnv("GOPATH")
 	if err != nil {
@@ -286,6 +289,14 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		return fmt.Errorf("could not get current user: %w", err)
 	}
 
+	ldFlags := fmt.Sprintf("-X storj.io/private/version.buildTimestamp=%d ", env.Commit.Timestamp.UnixNano()) +
+		fmt.Sprintf("-X storj.io/private/version.buildCommitHash=%s ", env.Commit.Hash) +
+		fmt.Sprintf("-X storj.io/private/version.buildVersion=%s ", env.Commit.Version.String()) +
+		fmt.Sprintf("-X storj.io/private/version.buildRelease=%t ", env.Commit.Release)
+	if env.LDFLAGS != "" {
+		ldFlags = ldFlags + " " + env.LDFLAGS
+	}
+
 	runArgs := []string{
 		"run", "--rm",
 		// don't build as root
@@ -298,6 +309,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		// setup correct os/arch
 		"-e", "GOOS=" + osarch.Os, "-e", "GOARCH=" + osarch.Arch,
 		"-e", "GOARM=6", "-e", "CGO_ENABLED=" + env.CGOENABLED,
+		"-e", "LDFLAGS=" + ldFlags,
 		// use goproxy
 		"-e", "GOPROXY",
 		// use our golang image
@@ -311,13 +323,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		buildArgs = append(buildArgs, "-tags", buildTags)
 	}
 
-	// embed version information
-	buildArgs = append(buildArgs, "-ldflags",
-		fmt.Sprintf("-X storj.io/private/version.buildTimestamp=%d ", env.Commit.Timestamp.UnixNano())+
-			fmt.Sprintf("-X storj.io/private/version.buildCommitHash=%s ", env.Commit.Hash)+
-			fmt.Sprintf("-X storj.io/private/version.buildVersion=%s ", env.Commit.Version.String())+
-			fmt.Sprintf("-X storj.io/private/version.buildRelease=%t ", env.Commit.Release), "./"+component,
-	)
+	buildArgs = append(buildArgs, "./"+component)
 
 	runArgs = append(runArgs, buildArgs...)
 
