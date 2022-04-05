@@ -28,7 +28,7 @@ type OsArch struct {
 	Arch string
 }
 
-var osarches = []OsArch{
+var defaultOsArches = []OsArch{
 	{"darwin", "amd64"},
 	{"darwin", "arm64"},
 	{"linux", "amd64"},
@@ -41,6 +41,7 @@ var osarches = []OsArch{
 var (
 	components   string
 	buildName    string
+	osArches     string
 	skipOsArches string
 	buildTags    string
 )
@@ -75,6 +76,7 @@ func main() {
 	flag.StringVar(&env.GoVersion, "go-version", "", "go version to use for building the image")
 	flag.StringVar(&buildTags, "build-tags", "", "build tags")
 
+	flag.StringVar(&osArches, "osarches", "", "comma-separated list of os/arch to build for")
 	flag.StringVar(&skipOsArches, "skip-osarches", "", "comma-separated list of os/arch to skip build for")
 
 	flag.Parse()
@@ -203,6 +205,19 @@ func (env *Env) BuildComponents(components []string) error {
 
 // BuildComponent builds the binaries for the different OsArch's for the specified component.
 func (env *Env) BuildComponent(tagdir, component string, skippedOsArches map[string]struct{}) error {
+	var osarches []OsArch
+	if osArches != "" {
+		for _, v := range strings.Split(osArches, ",") {
+			split := strings.Split(v, "/")
+			if len(split) != 2 {
+				return fmt.Errorf("wrong format for os/arch: %s", v)
+			}
+			osarches = append(osarches, OsArch{split[0], split[1]})
+		}
+	} else {
+		osarches = defaultOsArches
+	}
+
 	for _, osarch := range osarches {
 		if _, ok := skippedOsArches[fmt.Sprintf("%s/%s", osarch.Os, osarch.Arch)]; ok {
 			env.Log.Printf("Skipped build for %v", osarch)
