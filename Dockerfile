@@ -39,6 +39,8 @@ RUN curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.1
 # Android/Java binding tests
 RUN apt-get install -y default-jre
 
+## Tools for gateway testing
+RUN apt-get install -y s3fs
 # Duplicity backup tool for S3 gateway test scenarios
 RUN apt-get install -y duplicity python3-pip && pip install boto3
 
