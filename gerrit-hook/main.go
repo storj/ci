@@ -77,34 +77,57 @@ func patchsetCreated(ctx context.Context, argMap map[string]string, postComment 
 			return err
 		}
 	}
-	orgRepo, issue := findGithubRef(message)
-	prevOrgRepo, prevIssue := findGithubRef(previousMessage)
 
-	if issue != "" && (orgRepo != prevOrgRepo || issue != prevIssue) {
-		comment := fmt.Sprintf("Change %s mentions this issue.", argMap["change-url"])
-		if orgRepo == "" {
-			orgRepo = argMap["project"]
+	currentRefs := findGithubRefs(message)
+	oldRefs := findGithubRefs(previousMessage)
+	newRefs := subtractRefs(currentRefs, oldRefs)
+
+	for _, ref := range newRefs {
+		if ref.repo == "" {
+			ref.repo = argMap["project"]
 		}
-		return postComment(ctx, orgRepo, issue, comment)
+		comment := fmt.Sprintf("Change %s mentions this issue.", argMap["change-url"])
+		if err := postComment(ctx, ref.repo, ref.issue, comment); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-// findGithubRef tries to find the first reference to a github issues / pull request.
-func findGithubRef(message string) (repo string, issue string) {
+type githubRef struct {
+	repo  string
+	issue string
+}
+
+// findGithubRefs tries to find references to a github issues / pull request.
+func findGithubRefs(message string) (refs []githubRef) {
 	issuePattern := regexp.MustCompile(`([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)?#(\d+)`)
 	urlPattern := regexp.MustCompile(`https://github.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)/(?:pull|issues)/(\d+)`)
 	for _, line := range strings.Split(message, "\n") {
 		matches := issuePattern.FindStringSubmatch(line)
 		if matches != nil {
-			return matches[1], matches[2]
+			refs = append(refs, githubRef{repo: matches[1], issue: matches[2]})
 		}
 		matches = urlPattern.FindStringSubmatch(line)
 		if matches != nil {
-			return matches[1], matches[2]
+			refs = append(refs, githubRef{repo: matches[1], issue: matches[2]})
 		}
 	}
-	return "", ""
+	return refs
+}
+
+func subtractRefs(currentRefs, oldRefs []githubRef) []githubRef {
+	newRefs := []githubRef{}
+nextRef:
+	for _, current := range currentRefs {
+		for _, old := range oldRefs {
+			if current == old {
+				continue nextRef
+			}
+		}
+		newRefs = append(newRefs, current)
+	}
+	return newRefs
 }
 
 // getGerritMessage retrieves the last long commit message of a gerrit patch.
