@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -42,8 +44,7 @@ func check() (err error) {
 	defer func() {
 		ierr := worktreeRemove(tempDir)
 		if ierr != nil {
-			fmt.Fprintf(os.Stderr, "failed to remove worktree: %v\n", err)
-			err = ierr
+			fmt.Fprintf(os.Stderr, "failed to remove worktree: %v\n", ierr)
 		}
 	}()
 
@@ -52,12 +53,7 @@ func check() (err error) {
 		return fmt.Errorf("failed to change dir: %w", err)
 	}
 
-	err = checkout()
-	if err != nil {
-		return fmt.Errorf("failed to checkout: %w", err)
-	}
-
-	err = tidy()
+	err = tidy(tempDir)
 	if err != nil {
 		return fmt.Errorf("failed to tidy: %w", err)
 	}
@@ -70,28 +66,30 @@ func check() (err error) {
 	return err
 }
 
-func checkout() (err error) {
-	cmd := exec.Command("git", "checkout", "go.mod", "go.sum")
-	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
+func tidy(rootDir string) (err error) {
+	modFiles, err := exec.Command("git", "ls-files", "go.mod", "**/go.mod").Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "finding go.mod files failed: %v", err)
+		return err
+	}
 
-	return cmd.Run()
-}
+	for _, modfile := range strings.Split(string(modFiles), "\n") {
+		modfile = strings.TrimSpace(modfile)
+		if modfile == "" {
+			continue
+		}
 
-func tidy() (err error) {
-	for repeat := 2; repeat > 0; repeat-- {
 		cmd := exec.Command("go", "mod", "tidy")
+		cmd.Dir = filepath.Join(rootDir, filepath.Dir(modfile))
 		cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 
 		err = cmd.Run()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "go mod tidy failed, retrying: %v", err)
-			continue
+			return fmt.Errorf("go mod tidy failed: %w", err)
 		}
-
-		break
 	}
 
-	return err
+	return nil
 }
 
 func worktreeAdd(dst string) (err error) {
@@ -109,7 +107,7 @@ func worktreeRemove(dst string) (err error) {
 }
 
 func diff() (err error) {
-	cmd := exec.Command("git", "diff", "--exit-code", "go.mod", "go.sum")
+	cmd := exec.Command("git", "diff", "--exit-code", "go.mod", "go.sum", "**/go.mod", "**/go.sum")
 	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 
 	return cmd.Run()
