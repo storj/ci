@@ -51,7 +51,7 @@ def basename(path) {
 pipeline {
     agent {
         dockerfile {
-            filename 'Dockerfile'
+            filename 'images/ci/Dockerfile'
             args '-u root:root --cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod'
             label 'main'
         }
