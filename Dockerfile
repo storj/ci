@@ -67,7 +67,7 @@ RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.s
 RUN go install github.com/ckaznocha/protoc-gen-lint@v0.2.4 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.15.2 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
-    go install honnef.co/go/tools/cmd/staticcheck@2022.1 && \
+    go install honnef.co/go/tools/cmd/staticcheck@2022.1.1 && \
     # Output formatters \
     go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
     go install github.com/axw/gocov/gocov@v1.0.0  && \
