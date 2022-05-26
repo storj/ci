@@ -79,5 +79,5 @@ func checkCopyright(path string) error {
 	if bytes.Contains(header[:n], []byte(`Copyright `)) {
 		return nil
 	}
-	return fmt.Errorf("missing copyright %v: %w", path, err)
+	return fmt.Errorf("missing copyright %v", path)
 }
