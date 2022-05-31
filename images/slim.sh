@@ -16,7 +16,7 @@ curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/
 # Shellcheck for linting shell scripts
 apt-get -y install shellcheck
 
-curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | bash -s -- -b ${GOPATH}/bin v1.45.0
+curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | bash -s -- -b ${GOPATH}/bin v1.46.2
 
 # Linters, formatters, build tools
 go install github.com/ckaznocha/protoc-gen-lint@v0.2.4 && \
