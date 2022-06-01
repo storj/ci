@@ -20,6 +20,7 @@ build-image:
 	$(MAKE) .build
 
 .PHONY: push-image
+push-image:
 	$(MAKE) .push
 
 .PHONY: clean-image
