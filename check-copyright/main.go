@@ -6,12 +6,17 @@ package main
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
+
+	"github.com/zeebo/errs"
 )
 
 var checkFiles = map[string]bool{
@@ -21,7 +26,14 @@ var checkFiles = map[string]bool{
 	".vue": true,
 }
 
+// MissingCopyright error means that check was successful but header is missing.
+var MissingCopyright = errs.Class("missing copyright")
+
+// Fix is a flag to try fixing missing headers.
+var Fix = flag.Bool("fix", false, "Fix violations, if possible")
+
 func main() {
+	flag.Parse()
 	cmd := exec.Command("git", "ls-files")
 	out, err := cmd.Output()
 	if err != nil {
@@ -42,7 +54,13 @@ func main() {
 		}
 
 		err := checkCopyright(path)
-		if err != nil {
+		if MissingCopyright.Has(err) && *Fix {
+			err := fixCopyright(path)
+			if err != nil {
+				failed++
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+			}
+		} else if err != nil {
 			failed++
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
@@ -51,6 +69,25 @@ func main() {
 	if failed > 0 {
 		os.Exit(1)
 	}
+}
+
+func fixCopyright(path string) error {
+	f, err := ioutil.ReadFile(path)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+
+	stat, err := os.Stat(path)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	switch filepath.Ext(path) {
+	case ".go", ".ts", ".js", ".vue":
+		f = append([]byte(fmt.Sprintf("// Copyright (C) %d Storj Labs, Inc.\n// See LICENSE for copying information.\n\n", time.Now().Year())), f...)
+	default:
+		fmt.Fprintf(os.Stderr, "WARNING: copyright fix is not supported for file type: %s", path)
+	}
+	return ioutil.WriteFile(path, f, stat.Mode())
 }
 
 func checkCopyright(path string) error {
@@ -79,5 +116,5 @@ func checkCopyright(path string) error {
 	if bytes.Contains(header[:n], []byte(`Copyright `)) {
 		return nil
 	}
-	return fmt.Errorf("missing copyright %v", path)
+	return MissingCopyright.New("missing copyright %v", path)
 }
