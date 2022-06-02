@@ -1,7 +1,6 @@
 set -euo pipefail
 
 bash ./scripts/install-awscli.sh
-export PATH="$PATH:/root/bin"
 
 # Android/Java binding tests
 apt-get install -y default-jre

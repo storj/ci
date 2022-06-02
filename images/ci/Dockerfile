@@ -14,6 +14,7 @@ RUN bash images/deps.sh
 
 # ci:full
 
+ENV PATH="$PATH:/root/bin"
 RUN bash images/ci.sh
 
 # Set our entrypoint to close after 28 minutes, and forcefully close at 30 minutes.
