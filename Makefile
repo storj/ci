@@ -26,6 +26,6 @@ push-image:
 		--tag $(IMAGE_FULL) \
 		--push
 
-.PHONY: clean-image
-clean-image:
-	docker rmi $(IMAGE_FULL)
+.PHONY: clean
+clean:
+	docker buildx prune

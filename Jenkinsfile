@@ -46,7 +46,7 @@ node('node') {
   }
   finally {
     stage('Cleanup') {
-      sh 'make clean-image'
+      sh 'make clean'
       deleteDir()
     }
   }
