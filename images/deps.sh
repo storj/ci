@@ -2,8 +2,8 @@ set -euo pipefail
 
 # CockroachDB
 
-wget -qO- https://binaries.cockroachdb.com/cockroach-v21.2.7.linux-amd64.tgz | tar xvz
-cp -i cockroach-v21.2.7.linux-amd64/cockroach /usr/local/bin/
+wget -qO- https://binaries.cockroachdb.com/cockroach-v21.2.9.linux-amd64.tgz | tar xvz
+cp -i cockroach-v21.2.9.linux-amd64/cockroach /usr/local/bin/
 
 # Postgres
 
