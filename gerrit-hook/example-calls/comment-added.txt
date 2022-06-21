@@ -1,0 +1,31 @@
+/home/gerrit/site/hooks/comment-added
+--change
+sandbox~main~I35274baac857837c03cec22b1bf36b4c99ac56c7
+--change-url
+https://review.dev.storj.io/c/sandbox/+/7781
+--change-owner
+"Elek, Márton <marton@storj.io>"
+--change-owner-username
+elek
+--project
+sandbox
+--branch
+main
+--topic
+
+--author
+"Elek, Márton <marton@storj.io>"
+--author-username
+elek
+--commit
+ed6558528be8546dfb90fa752a0eea03310f4470
+--comment
+Patch Set 6:
+
+run jenkins
+--Verified
+0
+--Code-Review
+2
+--Code-Review-oldValue
+2

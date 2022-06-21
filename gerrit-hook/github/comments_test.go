@@ -1,10 +1,9 @@
 // Copyright (C) 2021 Storj Labs, Inc.
 // See LICENSE for copying information.
 
-package main
+package github
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,6 +31,15 @@ https://github.com/storj/common/issues/5616
 `)
 	})
 
+	t.Run("Full URL inline", func(t *testing.T) {
+		assertGithubRef(t, []githubRef{{"storj/sandbox", "1"}}, `no web change
+
+https://github.com/storj/sandbox/issues/1
+Change-Id: Iec94f295143f973a7e54bc5c8cf187dbc3eb2b64
+
+`)
+	})
+
 	t.Run("Short id with org/repo", func(t *testing.T) {
 		assertGithubRef(t, []githubRef{{"storj/common", "5616"}}, "foo bar storj/common#5616")
 	})
@@ -49,10 +57,4 @@ Github #123!
 https://github.com/storj/common/issues/5616
 `)
 	})
-}
-
-func Test_getGerritMessage(t *testing.T) {
-	msg, err := getGerritMessage(context.Background(), "storj%2Fvelero-plugin~master~I6d20b5a8605a99740834df326ad26e646eae206e", 0)
-	assert.NoError(t, err)
-	assert.Contains(t, msg, "The commit contains almost a working")
 }

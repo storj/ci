@@ -1,0 +1,25 @@
+/home/gerrit/site/hooks/patchset-created
+--change
+sandbox~refs%2Fmeta%2Fconfig~I77c4511e76c90105fd7db1c793dfdbb6e3a1c765
+--kind
+REWORK
+--change-url
+https://review.dev.storj.io/c/sandbox/+/7762
+--change-owner
+"Elek, Márton <marton@storj.io>"
+--change-owner-username
+elek
+--project
+sandbox
+--branch
+refs/meta/config
+--topic
+
+--uploader
+"Elek, Márton <marton@storj.io>"
+--uploader-username
+elek
+--commit
+6c664f8f75d9c64de8591b2c29ee580f89ce0c71
+--patchset
+1

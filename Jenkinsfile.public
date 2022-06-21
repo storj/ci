@@ -91,6 +91,22 @@ pipeline {
             }
         }
 
+        stage('Lint Gerrit Hook') {
+            steps {
+               dir("gerrit-hook"){
+                    sh 'check-copyright'
+                    sh 'check-large-files'
+                    sh 'check-imports ./...'
+                    sh 'check-peer-constraints'
+                    sh 'check-atomic-align ./...'
+                    sh 'check-errs ./...'
+                    sh 'staticcheck ./...'
+                    sh 'golangci-lint --config /go/ci/.golangci.yml -j=2 run'
+                    sh 'check-downgrades'
+                }
+            }
+        }
+
         stage('Repos') {
             steps {
                 script {

@@ -4,27 +4,55 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"net/http"
+	"math/rand"
 	"os"
 	"path"
-	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
+	"time"
 
+	"github.com/spf13/viper"
+	"github.com/storj/ci/gerrit-hook/gerrit"
+	"github.com/storj/ci/gerrit-hook/github"
+	"github.com/storj/ci/gerrit-hook/jenkins"
 	"github.com/zeebo/errs"
+	"go.uber.org/zap"
 )
-
-var gerritBaseURL = "https://review.dev.storj.io"
 
 // main is a binary which can be copied to gerrit's hooks directory and can act based on the give parameters.
 func main() {
+
+	cfg := zap.NewDevelopmentConfig()
+
+	// directory to collect events for debug
+	logDir := "/tmp/gerrit-hook-log"
+	if _, err := os.Stat(logDir); err == nil {
+		cfg.OutputPaths = append(cfg.OutputPaths, path.Join(logDir, "hook.log"))
+	}
+
+	log, _ := cfg.Build()
+
+	viper.SetConfigName("config")
+	viper.AddConfigPath(path.Join(path.Base(os.Args[0])))
+	viper.AddConfigPath("$HOME/.gerrit-hook")
+	viper.AddConfigPath("$HOME/.config/gerrit-hook")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Warn("Reading configuration files are failed. Hope you use environment variables (JENKINS_USER, JENKINS_TOKEN, GITHUB_TOKEN)", zap.Error(err))
+	}
+
+	viper.SetConfigName("gerrit-hook")
+
+	j := jenkins.NewClient(log.Named("jenkins"), viper.GetString("jenkins-user"), viper.GetString("jenkins-token"))
+
+	g := github.NewClient(log.Named("github"), viper.GetString("github-token"))
+
+	gr := gerrit.NewClient(log.Named("gerrit"), viper.GetString("gerrit-token"))
 
 	// arguments are defined by gerrit hook system, usually (but not only) --key value about the build
 	argMap := map[string]string{}
@@ -35,174 +63,118 @@ func main() {
 		}
 	}
 
-	if path.Base(os.Args[0]) == "patchset-created" || os.Getenv("GERRIT_HOOK_ACTION") == "patchset-created" {
-		err := patchsetCreated(context.Background(), argMap, postGithubComment)
+	// directory to collect events for debug
+	debugDir := "/tmp/gerrit-hook-debug"
+	if _, err := os.Stat(debugDir); err == nil {
+		filename := fmt.Sprintf("%s-%d.txt", time.Now().Format("20060102-150405"), rand.Int())
+		err := ioutil.WriteFile(path.Join(debugDir, filename), []byte(strings.Join(os.Args, "\n")), 0644)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "couldn't execute hook %+v\n", err.Error())
+			log.Error("couldn't write out debug information", zap.Error(err))
 		}
 	}
-}
+	// binary is symlinked to site/hooks under the name of default hook name:
+	// https://gerrit.googlesource.com/plugins/hooks/+/HEAD/src/main/resources/Documentation/config.md
+	action := path.Base(os.Args[0])
 
-// postGithubComment adds a new comment to a github issue.
-func postGithubComment(ctx context.Context, orgRepo string, issue string, message string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s/comments", orgRepo, issue)
-	request := map[string]string{
-		"body": message,
-	}
-	jsonRequest, err := json.Marshal(request)
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	err = callGithubAPIV3(ctx, "POST", url, bytes.NewBuffer(jsonRequest))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// patchsetCreated handles incoming hook call by gerrit for patchset-created events.
-func patchsetCreated(ctx context.Context, argMap map[string]string, postComment func(ctc context.Context, orgRepo string, issue string, message string) error) error {
-	patchset, err := strconv.Atoi(argMap["patchset"])
-	if err != nil {
-		return errs.New("given patchset id is not a number: %s", argMap["patchset"])
-	}
-	message, err := getGerritMessage(ctx, argMap["change"], patchset)
-	if err != nil {
-		return err
-	}
-	previousMessage := ""
-	if patchset > 0 {
-		previousMessage, err = getGerritMessage(ctx, argMap["change"], patchset-1)
+	// helping local development
+	if os.Getenv("GERRIT_HOOK_ARGFILE") != "" {
+		argMap, action, err = readArgFile(os.Getenv("GERRIT_HOOK_ARGFILE"))
 		if err != nil {
-			return err
+			log.Error("couldn't write out debug information", zap.Error(err))
 		}
 	}
 
-	currentRefs := findGithubRefs(message)
-	oldRefs := findGithubRefs(previousMessage)
-	newRefs := subtractRefs(currentRefs, oldRefs)
+	log.Debug("Hook is called",
+		zap.String("action", action),
+		zap.String("project", argMap["project"]),
+		zap.String("change", argMap["change"]),
+	)
 
-	for _, ref := range newRefs {
-		if ref.repo == "" {
-			ref.repo = argMap["project"]
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
+	switch action {
+	case "patchset-created":
+		// github comment sync is enabled for all projects
+		err := github.AddComment(ctx, gr, argMap["project"], argMap["change"], argMap["commit"], argMap["change-url"], argMap["patchset"], g.PostGithubComment)
+		if err != nil {
+			log.Error("Couldn't add github PR comment", zap.Error(err))
 		}
-		comment := fmt.Sprintf("Change %s mentions this issue.", argMap["change-url"])
-		if err := postComment(ctx, ref.repo, ref.issue, comment); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
-type githubRef struct {
-	repo  string
-	issue string
-}
-
-// findGithubRefs tries to find references to a github issues / pull request.
-func findGithubRefs(message string) (refs []githubRef) {
-	issuePattern := regexp.MustCompile(`([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)?#(\d+)`)
-	urlPattern := regexp.MustCompile(`https://github.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)/(?:pull|issues)/(\d+)`)
-	for _, line := range strings.Split(message, "\n") {
-		matches := issuePattern.FindStringSubmatch(line)
-		if matches != nil {
-			refs = append(refs, githubRef{repo: matches[1], issue: matches[2]})
-		}
-		matches = urlPattern.FindStringSubmatch(line)
-		if matches != nil {
-			refs = append(refs, githubRef{repo: matches[1], issue: matches[2]})
-		}
-	}
-	return refs
-}
-
-func subtractRefs(currentRefs, oldRefs []githubRef) []githubRef {
-	newRefs := []githubRef{}
-nextRef:
-	for _, current := range currentRefs {
-		for _, old := range oldRefs {
-			if current == old {
-				continue nextRef
+		if enabledProject(argMap["project"]) {
+			err = jenkins.TriggeredByAnyChange(ctx, log, j, gr, argMap["project"], argMap["change"], argMap["commit"])
+			if err != nil {
+				log.Error("Couldn't trigger new jenkins build", zap.Error(err))
 			}
 		}
-		newRefs = append(newRefs, current)
+	case "comment-added":
+		if enabledProject(argMap["project"]) {
+			err := jenkins.TriggeredByComment(ctx, log, j, gr, argMap["project"], argMap["change"], argMap["commit"], argMap["comment"])
+			if err != nil {
+				log.Error("Couldn't trigger new jenkins build", zap.Error(err))
+			}
+		}
+	case "ref-updated":
+		if enabledProject(argMap["project"]) {
+			// in case of wip -> ready / ready -> wip state change, newrev=refs/changes/02/7902/meta
+
+			parts := strings.Split(argMap["refname"], "/")
+			if len(parts) == 5 && parts[4] == "meta" {
+				change, err := gr.GetChange(context.Background(), parts[3])
+				if err != nil {
+					log.Error("ref-updated event but change couldn't be found", zap.Error(err))
+				}
+
+				err = jenkins.TriggeredByAnyChange(ctx, log, j, gr, change.Project, change.ChangeID, change.CurrentRevision)
+				if err != nil {
+					log.Error("Couldn't trigger new jenkins build", zap.Error(err))
+				}
+			}
+		}
+	default:
+		// we are not interested about other type of hooks, even if they are delivered.
 	}
-	return newRefs
+
 }
 
-// getGerritMessage retrieves the last long commit message of a gerrit patch.
-func getGerritMessage(ctx context.Context, changesetID string, patchset int) (string, error) {
-	url := fmt.Sprintf("%s/changes/%s/revisions/%d/commit", gerritBaseURL, changesetID, patchset)
-	httpRequest, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return "", errs.Wrap(err)
+func enabledProject(s string) bool {
+	for _, k := range viper.GetStringSlice("projects") {
+		if k == s {
+			return true
+		}
 	}
-	httpResponse, err := http.DefaultClient.Do(httpRequest)
-	if err != nil {
-		return "", errs.Wrap(err)
-	}
-
-	if httpResponse.StatusCode >= 300 {
-		return "", errs.New("couldn't get gerrit message from %s, code: %d", url, httpResponse.StatusCode)
-	}
-	body, err := ioutil.ReadAll(httpResponse.Body)
-	if err != nil {
-		return "", errs.Wrap(err)
-	}
-	defer func() { _ = httpResponse.Body.Close() }()
-
-	var jsonContent map[string]interface{}
-	// XSSI prevention chars are removed here
-	err = json.Unmarshal(body[5:], &jsonContent)
-	if err != nil {
-		return "", errs.Wrap(err)
-	}
-
-	return jsonContent["message"].(string), nil
+	return false
 }
 
-// getToken retrieves the GITHUB_TOKEN for API usage.
-func getToken() (string, error) {
-	token := os.Getenv("GITHUB_TOKEN")
-	if token != "" {
-		return token, nil
-	}
-	configDir, err := os.UserConfigDir()
+func readArgFile(fileName string) (argMap map[string]string, action string, err error) {
+	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return "", errs.Wrap(err)
-	}
-	configFile := filepath.Join(configDir, "gerrit-hook", "github-token")
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		return "", fmt.Errorf("token is not defined neither with GITHUB_TOKEN nor in %s file", configFile)
-	}
-	tokenBytes, err := os.ReadFile(configFile)
-	if err != nil {
-		return "", errs.Wrap(err)
-	}
-	return string(bytes.TrimSpace(tokenBytes)), nil
-}
-
-// callGithubAPIV3 is a wrapper around the HTTP method call.
-func callGithubAPIV3(ctx context.Context, method string, url string, body io.Reader) error {
-	client := &http.Client{}
-
-	req, err := http.NewRequestWithContext(ctx, method, url, body)
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	token, err := getToken()
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	req.Header.Add("Authorization", "token "+token)
-	req.Header.Add("Accept", "application/vnd.github.v3+json")
-	resp, err := client.Do(req)
-	if err != nil {
-		return errs.Wrap(err)
+		return argMap, action, errs.Wrap(err)
 	}
 
-	if resp.StatusCode > 299 {
-		return errs.Combine(errs.New("%s url is failed (%s): %s", method, resp.Status, url), resp.Body.Close())
+	argMap = make(map[string]string)
+	action = ""
+	key := ""
+	value := ""
+	for _, line := range strings.Split(string(content), "\n") {
+		if action == "" {
+			action = path.Base(line)
+			continue
+		}
+		if strings.HasPrefix(line, "--") {
+			if key != "" {
+				argMap[key] = value
+			}
+			key = line[2:]
+			value = ""
+		} else {
+			if value != "" {
+				value += "\n"
+			}
+			value += line
+		}
 	}
-	return resp.Body.Close()
+	if key != "" {
+		argMap[key] = value
+	}
+	return argMap, action, nil
 }

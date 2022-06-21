@@ -1,0 +1,13 @@
+/home/gerrit/site/hooks/ref-updated
+--oldrev
+5ffbbb73141fb7d911f3ca4546e6d02eb3d554ed
+--newrev
+34b99293448b598ffbf081c538e68270a55f5040
+--refname
+refs/changes/02/7902/meta
+--project
+sandbox
+--submitter
+"Elek, Márton <marton@storj.io>"
+--submitter-username
+elek
