@@ -20,9 +20,10 @@ type Client struct {
 func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 	q := strings.Join([]string{
 		"status:open",
-		"label:Code-Review>1",
-		"-label:Code-Review<0",
+		"label:Code-Review=2,count>=2",
+		"-label:Code-Review<-1",
 		"-has:unresolved",
+		"-is:wip",
 	}, "+")
 
 	err = c.query("GET", "changes/?q="+q+"&o=CURRENT_REVISION&o=SUBMITTABLE", &cis)
@@ -30,7 +31,6 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 		return nil, errs.Wrap(err)
 	}
 
-	cis = filter(cis, (*ChangeInfo).Reviewed)
 	cis = filter(cis, func(ci *ChangeInfo) bool {
 		return !ci.HasVerified() || ci.Verified()
 	})

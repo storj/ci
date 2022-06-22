@@ -78,14 +78,13 @@ func (ci *ChangeInfo) CanMerge() bool {
 	return true &&
 		ci.HasNoParents() &&
 		ci.Verified() &&
-		ci.Reviewed() &&
 		ci.Submittable &&
 		ci.Mergeable
 }
 
 func (ci *ChangeInfo) HasVerified() bool {
 	for _, rec := range ci.SubmitRecords {
-		if rec.RuleName != "gerrit~PrologRule" {
+		if rec.RuleName != "gerrit~PrologRule" && rec.RuleName != "gerrit~DefaultSubmitRule" {
 			continue
 		}
 		for _, lab := range rec.Labels {
@@ -99,7 +98,7 @@ func (ci *ChangeInfo) HasVerified() bool {
 
 func (ci *ChangeInfo) Verified() bool {
 	for _, rec := range ci.SubmitRecords {
-		if rec.RuleName != "gerrit~PrologRule" {
+		if rec.RuleName != "gerrit~PrologRule" && rec.RuleName != "gerrit~DefaultSubmitRule" {
 			continue
 		}
 		for _, lab := range rec.Labels {
@@ -109,22 +108,6 @@ func (ci *ChangeInfo) Verified() bool {
 		}
 	}
 	return false
-}
-
-func (ci *ChangeInfo) Reviewed() bool {
-	for _, rec := range ci.SubmitRecords {
-		if rec.RuleName != "gerrit~PrologRule" {
-			continue
-		}
-		for _, lab := range rec.Labels {
-			if lab.Label == "Code-Review" || lab.Label == "Code-Review-2" {
-				if lab.Status == "NEED" {
-					return false
-				}
-			}
-		}
-	}
-	return true
 }
 
 func (ci *ChangeInfo) actionURL(action string) string {
