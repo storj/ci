@@ -71,15 +71,21 @@ func run(ctx context.Context, cl *Client) error {
 		return cl.Submit(submits[0])
 	}
 
-	if all(cis, (*ChangeInfo).HasVerified) {
-		if rebases := filter(cis, (*ChangeInfo).CanRebase); len(rebases) > 0 {
-			for _, rebase := range rebases {
-				fmt.Println("Rebase", rebase.ViewURL(cl.base))
-				if err := cl.Rebase(rebase); err == nil {
-					return nil
+	byProject := make(map[string][]*ChangeInfo)
+	for _, ci := range cis {
+		byProject[ci.Project] = append(byProject[ci.Project], ci)
+	}
+
+	for _, cis := range byProject {
+		if all(cis, (*ChangeInfo).HasVerified) {
+			if rebases := filter(cis, (*ChangeInfo).CanRebase); len(rebases) > 0 {
+				for _, rebase := range rebases {
+					fmt.Println("Rebase", rebase.ViewURL(cl.base))
+					if err := cl.Rebase(rebase); err == nil {
+						break
+					}
 				}
 			}
-			return errs.New("all rebases failed")
 		}
 	}
 
