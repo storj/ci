@@ -8,6 +8,7 @@ go install golang.org/dl/go1.14@latest && go1.14 download
 
 curl -sfL https://deb.nodesource.com/setup_16.x  | bash -
 apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y brotli unzip libuv1-dev libjson-c-dev nettle-dev nodejs
+npm install -g pnpm@v7
 
 curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protoc-3.12.3-linux-x86_64.zip -o /tmp/protoc.zip && unzip /tmp/protoc.zip -d "$HOME"/protoc
 
