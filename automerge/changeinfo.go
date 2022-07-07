@@ -22,6 +22,7 @@ type ChangeInfo struct {
 	CurrentRevision string                       `json:"current_revision"`
 	Related         []RelatedChangeAndCommitInfo `json:"changes"`
 	Messages        []ChangeMessageInfo
+	Labels          map[string]ApprovalInfo
 }
 
 type SubmitRecordInfo struct {
@@ -68,6 +69,22 @@ type ChangeMessageInfo struct {
 	Revision   int         `json:"_revision_number"`
 }
 
+type ApprovalInfo struct {
+	All   []ApprovalInfoVote `json:"all"`
+	Value int                `json:"value"`
+}
+
+type ApprovalInfoVote struct {
+	AccountId int        `json:"_account_id"`
+	Date      gerritTime `json:"date"`
+	Value     int        `json:"value"`
+	Tag       string     `json:"tag"`
+}
+
+type AccountInfo struct {
+	Id int `json:"_account_id"`
+}
+
 type gerritTime time.Time
 
 func (g *gerritTime) UnmarshalJSON(data []byte) error {
@@ -80,10 +97,6 @@ func (g *gerritTime) UnmarshalJSON(data []byte) error {
 	}
 	*g = gerritTime(t)
 	return nil
-}
-
-type AccountInfo struct {
-	Id int `json:"_account_id"`
 }
 
 func (ci *ChangeInfo) CanRebase() bool {
@@ -129,6 +142,13 @@ func (ci *ChangeInfo) HasVerified() bool {
 			}
 		}
 	}
+
+	for _, vote := range ci.Labels["Verified"].All {
+		if vote.Value != 0 {
+			return true
+		}
+	}
+
 	return false
 }
 
@@ -143,7 +163,18 @@ func (ci *ChangeInfo) Verified() bool {
 			}
 		}
 	}
-	return false
+
+	hasPositive := false
+	for _, vote := range ci.Labels["Verified"].All {
+		if vote.Value < 0 {
+			return false
+		}
+		if vote.Value > 1 {
+			hasPositive = true
+		}
+	}
+
+	return hasPositive
 }
 
 func (ci *ChangeInfo) NotBuilding() bool {

@@ -26,7 +26,7 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 		"-is:wip",
 	}, "+")
 
-	err = c.query("GET", "changes/?q="+q+"&o=CURRENT_REVISION&o=SUBMITTABLE&o=MESSAGES", &cis)
+	err = c.query("GET", "changes/?q="+q+"&o=CURRENT_REVISION&o=SUBMITTABLE&o=MESSAGES&o=LABELS", &cis)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
