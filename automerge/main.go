@@ -49,9 +49,9 @@ func run(ctx context.Context, cl *Client) error {
 	tw := tabwriter.NewWriter(os.Stdout, 4, 4, 4, ' ', 0)
 	defer tw.Flush()
 
-	fmt.Fprintln(tw, "change\tnumber\tmergable\tsubmittable\thas_no_parents\thas_verified\tverified\trev")
+	fmt.Fprintln(tw, "change\tnumber\tmergable\tsubmittable\thas_no_parents\thas_verified\tverified\tlatest_build\tnot_building\tcan_rebase\trev")
 	for _, ci := range cis {
-		fmt.Fprintf(tw, "%s\t%d\t%v\t%v\t%v\t%v\t%v\t%v\n",
+		fmt.Fprintf(tw, "%s\t%d\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\n",
 			ci.ViewURL(cl.base),
 			ci.Number,
 			ci.Mergeable,
@@ -59,6 +59,9 @@ func run(ctx context.Context, cl *Client) error {
 			ci.HasNoParents(),
 			ci.HasVerified(),
 			ci.Verified(),
+			ci.LatestBuildStarted(),
+			ci.NotBuilding(),
+			ci.CanRebase(),
 			ci.CurrentRevision,
 		)
 	}
@@ -77,7 +80,7 @@ func run(ctx context.Context, cl *Client) error {
 	}
 
 	for _, cis := range byProject {
-		if all(cis, (*ChangeInfo).HasVerified) {
+		if all(cis, (*ChangeInfo).NotBuilding) {
 			if rebases := filter(cis, (*ChangeInfo).CanRebase); len(rebases) > 0 {
 				for _, rebase := range rebases {
 					fmt.Println("Rebase", rebase.ViewURL(cl.base))

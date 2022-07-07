@@ -26,7 +26,7 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 		"-is:wip",
 	}, "+")
 
-	err = c.query("GET", "changes/?q="+q+"&o=CURRENT_REVISION&o=SUBMITTABLE", &cis)
+	err = c.query("GET", "changes/?q="+q+"&o=CURRENT_REVISION&o=SUBMITTABLE&o=MESSAGES", &cis)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -40,6 +40,8 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
+
+		err = c.query("GET", ci.infoURL("messages"), &ci)
 	}
 
 	sort.Slice(cis, func(i, j int) bool {
