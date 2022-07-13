@@ -225,8 +225,11 @@ func (ci *ChangeInfo) LatestBuildStarted() time.Time {
 			if msg.Revision > largestRev {
 				largestRev = msg.Revision
 				latest = time.Time(msg.Date)
+			} else if msg.Revision == largestRev && time.Time(msg.Date).After(latest) {
+				latest = time.Time(msg.Date)
 			}
 		}
 	}
+
 	return latest
 }
