@@ -153,14 +153,14 @@ func (ci *ChangeInfo) HasVerified() bool {
 }
 
 func (ci *ChangeInfo) Verified() bool {
-	hasSubmit := false
+	// if it has verified as a submit record, then it's verified
 	for _, rec := range ci.SubmitRecords {
 		if rec.RuleName != "gerrit~PrologRule" && rec.RuleName != "gerrit~DefaultSubmitRule" {
 			continue
 		}
 		for _, lab := range rec.Labels {
 			if lab.Label == "Verified" && lab.Status == "OK" {
-				hasSubmit = true
+				return true
 			}
 		}
 	}
@@ -182,7 +182,7 @@ func (ci *ChangeInfo) Verified() bool {
 		return false
 	}
 
-	return hasSubmit || mostPositive >= 2
+	return mostPositive >= 2
 }
 
 func (ci *ChangeInfo) NotBuilding() bool {
