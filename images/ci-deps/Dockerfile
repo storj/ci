@@ -11,7 +11,3 @@ RUN bash images/slim.sh
 # ci:deps
 
 RUN bash images/deps.sh
-
-# Set our entrypoint to close after 28 minutes, and forcefully close at 30 minutes.
-# This is to prevent Jenkins collecting cats.
-ENTRYPOINT ["timeout", "-k30m", "28m"]
