@@ -1,18 +1,19 @@
-FROM golang:1.14.6
+FROM golang:1.17.12
 
 # Postgres
-RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
+RUN curl -sf https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
 
-RUN apt-get update && apt-get install -y -qq postgresql-12 redis-server unzip libuv1-dev libjson-c-dev nettle-dev
+RUN apt-get update && apt-get install -y -qq postgresql-13 redis-server unzip libuv1-dev libjson-c-dev nettle-dev
 
-RUN rm /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'local   all             all                                     trust' >> /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'host    all             all             127.0.0.1/8             trust' >> /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/12/main/pg_hba.conf; \
-	echo 'host    all             all             ::0/0                   trust' >> /etc/postgresql/12/main/pg_hba.conf;
+RUN rm /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'local   all             all                                     trust' >> /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'host    all             all             127.0.0.1/8             trust' >> /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/13/main/pg_hba.conf; \
+	echo 'host    all             all             ::0/0                   trust' >> /etc/postgresql/13/main/pg_hba.conf;
 
-RUN echo 'max_connections = 1000' >> /etc/postgresql/12/main/conf.d/connectionlimits.conf
+RUN echo 'max_connections = 1000' >> /etc/postgresql/13/main/conf.d/connectionlimits.conf
+RUN echo 'fsync = off' >> /etc/postgresql/13/main/conf.d/nosync.conf
 
 # Android/Java binding tests
 RUN apt-get install -y default-jre
