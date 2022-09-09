@@ -25,27 +25,36 @@ import (
 )
 
 var (
-	ref    = flag.String("ref", "HEAD", "which git ref to check")
-	gitdir = flag.String("gitdir", ".", "which directory the git repo is in")
+	ref = flag.String("ref", "HEAD", "which git ref to check")
 )
 
 var errDowngradesDetected = errors.New("downgrades detected")
 
 func main() {
 	flag.Parse()
-	if err := run(*gitdir, *ref); errors.Is(err, errDowngradesDetected) {
+
+	if err := run(*ref); errors.Is(err, errDowngradesDetected) {
 		os.Exit(3)
 	} else if err != nil {
 		log.Fatalf("%+v", err)
 	}
 }
 
-func run(gitdir, ref string) error {
+func run(ref string) error {
 	olddir, err := ioutil.TempDir("", "check-downgrades-*")
 	if err != nil {
 		return errs.Wrap(err)
 	}
 	defer func() { err = errs.Combine(err, os.RemoveAll(olddir)) }()
+
+	gitdirBytes, err := execute(".", "git", "rev-parse", "--show-toplevel")
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	// technically i think this doesn't work if there's a newline at the
+	// end of the file path, but that is such an esoteric edge case that
+	// i'm willing to ignore it. if this fails you due to that, do better.
+	gitdir := strings.TrimRight(string(gitdirBytes), "\r\n")
 
 	_, err = execute(gitdir, "git", "worktree", "add", "-f", olddir, ref+"^")
 	if err != nil {
@@ -183,7 +192,7 @@ func execute(dir, bin string, args ...string) ([]byte, error) {
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, errs.New("%s", out)
+		return nil, errs.New("%w: %s", err, out)
 	}
 	return out, nil
 }
