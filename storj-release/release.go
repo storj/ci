@@ -6,7 +6,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -250,14 +249,14 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		versionInfoTemplate := filepath.Join(component, "versioninfo.json")
 		defer func() { _ = os.Remove(versionInfoTemplate) }()
 
-		if err := ioutil.WriteFile(versionInfoTemplate, []byte(versionInfo), 0644); err != nil {
+		if err := os.WriteFile(versionInfoTemplate, []byte(versionInfo), 0644); err != nil {
 			return fmt.Errorf("failed to write versioninfo.json: %w", err)
 		}
 
 		iconfile := filepath.Join(component, "storj.ico")
 		defer func() { _ = os.Remove(iconfile) }()
 
-		if err := ioutil.WriteFile(iconfile, icondata, 0644); err != nil {
+		if err := os.WriteFile(iconfile, icondata, 0644); err != nil {
 			return fmt.Errorf("failed to write storj.ico: %w", err)
 		}
 

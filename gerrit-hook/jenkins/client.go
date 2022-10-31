@@ -7,7 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -66,7 +66,7 @@ func (c *Client) jenkinsHTTPCall(ctx context.Context, url string, result interfa
 		return errs.New("couldn't get gerrit message from %s, code: %d", url, httpResponse.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(httpResponse.Body)
+	body, err := io.ReadAll(httpResponse.Body)
 	if err != nil {
 		return errs.Wrap(err)
 	}

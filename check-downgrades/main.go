@@ -9,7 +9,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -41,7 +40,7 @@ func main() {
 }
 
 func run(ref string) error {
-	olddir, err := ioutil.TempDir("", "check-downgrades-*")
+	olddir, err := os.MkdirTemp("", "check-downgrades-*")
 	if err != nil {
 		return errs.Wrap(err)
 	}

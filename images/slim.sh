@@ -3,6 +3,8 @@ set -euo pipefail
 # Older versions of Go
 
 go install golang.org/dl/go1.14@latest && go1.14 download
+go install golang.org/dl/go1.16.15@latest && go1.16.15 download
+go install golang.org/dl/go1.17.13@latest && go1.17.13 download
 
 # Tooling
 

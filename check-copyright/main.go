@@ -9,7 +9,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -72,7 +71,7 @@ func main() {
 }
 
 func fixCopyright(path string) error {
-	f, err := ioutil.ReadFile(path)
+	f, err := os.ReadFile(path)
 	if err != nil {
 		return errs.Wrap(err)
 	}
@@ -87,7 +86,7 @@ func fixCopyright(path string) error {
 	default:
 		fmt.Fprintf(os.Stderr, "WARNING: copyright fix is not supported for file type: %s", path)
 	}
-	return ioutil.WriteFile(path, f, stat.Mode())
+	return os.WriteFile(path, f, stat.Mode())
 }
 
 func checkCopyright(path string) error {

@@ -5,7 +5,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,7 +21,7 @@ func main() {
 }
 
 func check() (err error) {
-	tempDir, err := ioutil.TempDir("", "check-mod-tidy-")
+	tempDir, err := os.MkdirTemp("", "check-mod-tidy-")
 	if err != nil {
 		return fmt.Errorf("failed to create temp dir: %w", err)
 	}

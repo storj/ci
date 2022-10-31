@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -59,7 +58,7 @@ func (g *Client) doAPICall(ctx context.Context, url string, request interface{},
 		return errs.Wrap(err)
 	}
 
-	body, err := ioutil.ReadAll(httpResponse.Body)
+	body, err := io.ReadAll(httpResponse.Body)
 	if err != nil {
 		return errs.Wrap(err)
 	}

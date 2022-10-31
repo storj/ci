@@ -8,7 +8,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -183,7 +182,7 @@ func checklock(dir string, dirs []string, files []string) error {
 
 	protolockdir := findProtolockDir(local)
 
-	tmpdir, err := ioutil.TempDir("", "protolock")
+	tmpdir, err := os.MkdirTemp("", "protolock")
 	if err != nil {
 		return err
 	}
@@ -191,12 +190,12 @@ func checklock(dir string, dirs []string, files []string) error {
 		_ = os.RemoveAll(tmpdir)
 	}()
 
-	original, err := ioutil.ReadFile(filepath.Join(protolockdir, "proto.lock"))
+	original, err := os.ReadFile(filepath.Join(protolockdir, "proto.lock"))
 	if err != nil {
 		return fmt.Errorf("unable to read proto.lock: %w", err)
 	}
 
-	err = ioutil.WriteFile(filepath.Join(tmpdir, "proto.lock"), original, 0755)
+	err = os.WriteFile(filepath.Join(tmpdir, "proto.lock"), original, 0755)
 	if err != nil {
 		return fmt.Errorf("unable to read proto.lock: %w", err)
 	}
@@ -211,7 +210,7 @@ func checklock(dir string, dirs []string, files []string) error {
 		return err
 	}
 
-	changed, err := ioutil.ReadFile(filepath.Join(tmpdir, "proto.lock"))
+	changed, err := os.ReadFile(filepath.Join(tmpdir, "proto.lock"))
 	if err != nil {
 		return fmt.Errorf("unable to read new proto.lock: %w", err)
 	}
@@ -333,7 +332,7 @@ func diff(b1, b2 []byte) (data []byte, err error) {
 }
 
 func writeTempFile(prefix string, data []byte) (string, error) {
-	file, err := ioutil.TempFile("", prefix)
+	file, err := os.CreateTemp("", prefix)
 	if err != nil {
 		return "", err
 	}

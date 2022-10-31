@@ -6,7 +6,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
@@ -67,7 +66,7 @@ func main() {
 	debugDir := "/tmp/gerrit-hook-debug"
 	if _, err := os.Stat(debugDir); err == nil {
 		filename := fmt.Sprintf("%s-%d.txt", time.Now().Format("20060102-150405"), rand.Int())
-		err := ioutil.WriteFile(path.Join(debugDir, filename), []byte(strings.Join(os.Args, "\n")), 0644)
+		err := os.WriteFile(path.Join(debugDir, filename), []byte(strings.Join(os.Args, "\n")), 0644)
 		if err != nil {
 			log.Error("couldn't write out debug information", zap.Error(err))
 		}
@@ -146,7 +145,7 @@ func enabledProject(s string) bool {
 }
 
 func readArgFile(fileName string) (argMap map[string]string, action string, err error) {
-	content, err := ioutil.ReadFile(fileName)
+	content, err := os.ReadFile(fileName)
 	if err != nil {
 		return argMap, action, errs.Wrap(err)
 	}
