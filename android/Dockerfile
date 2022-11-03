@@ -61,13 +61,7 @@ RUN yes | sdkmanager \
     "system-images;android-24;default;x86_64"
 
 # Install go-licenses
-#
-# NOTE: It requires its own go path because it uses db files from the licenses
-# go module.
-RUN mkdir -p /ci/go-licenses && \
-    GO111MODULE=on GOPATH=/ci/go-licenses go get \
-    github.com/google/go-licenses@2ee7a02f6ae4f78b6b2d6ef421cedadbeabe2a89
-ENV PATH "$PATH:/ci/go-licenses/bin"
+RUN go install github.com/google/go-licenses@v1.5.0
 
 # Tools in this repository
 COPY . /go/ci
