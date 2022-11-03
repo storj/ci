@@ -185,3 +185,6 @@ issues:
     - linters: # false-positives for c exports
         - revive
       text: "var-naming"
+    - linters: # uninteresting
+        - revive
+      text: "package-comments"

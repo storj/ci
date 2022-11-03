@@ -21,7 +21,7 @@ curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/
 apt-get -y install shellcheck
 
 # Linters, formatters, build tools
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.47.3 && \
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1 && \
     go install github.com/ckaznocha/protoc-gen-lint@v0.2.4 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.15.2 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
