@@ -1,13 +1,17 @@
 FROM golang:1.18.8
 
-# ci:slim
-
-COPY . /go/ci
 WORKDIR /go/ci
 
-RUN cd /go/ci && go install ./...
+# ci:slim
+
+COPY images/slim.sh images/slim.sh
 RUN bash images/slim.sh
 
 # ci:deps
 
+COPY images/deps.sh images/deps.sh
 RUN bash images/deps.sh
+
+# custom tools
+COPY . /go/ci
+RUN go install ./...
