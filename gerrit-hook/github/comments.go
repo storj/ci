@@ -124,10 +124,13 @@ func (g *Client) callGithubAPIV3(ctx context.Context, method string, url string,
 		return errs.Wrap(err)
 	}
 
+	response, _ := io.ReadAll(resp.Body)
+	defer func() { _ = resp.Body.Close() }()
+
 	if resp.StatusCode > 299 {
-		return errs.Combine(errs.New("%s url is failed (%s): %s", method, resp.Status, url), resp.Body.Close())
+		return errs.New("%s url is failed (%s), url: %s, response: %q", method, resp.Status, url, response)
 	}
-	return resp.Body.Close()
+	return nil
 }
 
 // PostGithubComment adds a new comment to a github issue.
