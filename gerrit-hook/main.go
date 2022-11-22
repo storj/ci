@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -49,7 +50,22 @@ func main() {
 
 	j := jenkins.NewClient(log.Named("jenkins"), viper.GetString("jenkins-user"), viper.GetString("jenkins-token"))
 
-	g := github.NewClient(log.Named("github"), viper.GetString("github-token"))
+	client := &http.Client{}
+	if appid := viper.GetString("github-appid"); appid != "" {
+		instanceid := viper.GetString("github-instanceid")
+		keypath := viper.GetString("github-key")
+		transport, err := github.LoadInstanceTransport(appid, instanceid, keypath)
+		if err != nil {
+			log.Error("failed to load github authorization", zap.Error(err))
+		} else {
+			client.Transport = transport
+		}
+	} else if pat := viper.GetString("github-token"); pat != "" {
+		client.Transport = github.Token(pat)
+	} else {
+		log.Warn("github credentials missing")
+	}
+	g := github.NewClient(log.Named("github"), client)
 
 	gerritUser := viper.GetString("gerrit-user")
 	if gerritUser == "" {

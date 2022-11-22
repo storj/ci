@@ -17,11 +17,23 @@ To install:
 3. Configure `$GERRIT_HOME/.config/gerrit-hook/config.yaml`:
 
    ```
+   # Gerrit
    gerrit-user: <some gerrit service user>
    gerrit-token: <token generated for the specified user>
+
+   # Github App
+   github-appid: <github application id>
+   github-instanceid: <github instance id>
+   github-key: <github application path to private key>
+
+   # Github Personal Access Token
    github-token: <github personal access token>
+
+   # Jenkins
    jenkins-user: <some jenkins service user>
    jenkins-token: <token generated for the specified user>
+
+   # Projects where this plugin is enabled.
    projects:
      - sandbox
    ```

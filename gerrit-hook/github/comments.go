@@ -21,15 +21,15 @@ import (
 
 // Client is a simplified REST Api client for specific Github functionalities.
 type Client struct {
-	token string
-	log   *zap.Logger
+	client *http.Client
+	log    *zap.Logger
 }
 
 // NewClient creates a new Github REST client.
-func NewClient(log *zap.Logger, token string) Client {
+func NewClient(log *zap.Logger, client *http.Client) Client {
 	return Client{
-		token: token,
-		log:   log,
+		client: client,
+		log:    log,
 	}
 }
 
@@ -110,16 +110,13 @@ nextRef:
 
 // callGithubAPIV3 is a wrapper around the HTTP method call.
 func (g *Client) callGithubAPIV3(ctx context.Context, method string, url string, body io.Reader) error {
-	client := &http.Client{}
-
 	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return errs.Wrap(err)
 	}
 
-	req.Header.Add("Authorization", "token "+g.token)
 	req.Header.Add("Accept", "application/vnd.github.v3+json")
-	resp, err := client.Do(req)
+	resp, err := g.client.Do(req)
 	if err != nil {
 		return errs.Wrap(err)
 	}
