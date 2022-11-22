@@ -2,9 +2,33 @@
 
 Gerrit-hook can handle any type of gerrit hooks.
 
-To install create a symlink from the binary to the `$GERRIT_SITE/hooks` to the compiled binary.
+To install:
 
-In Storj labs environment it can be installed by `./deploy.sh`.
+1. Add `gerrit-hook` binary to `$GERRIT_SITE/hooks` folder.
+2. Configure `$GERRIT_SITE/etc/config` with:
+
+   ```
+   [hooks]
+      commentAddedHook = gerrit-hook
+      patchsetCreatedHook = gerrit-hook
+      refUpdatedHook = gerrit-hook
+   ```
+
+3. Configure `$GERRIT_HOME/.config/gerrit-hook/config.yaml`:
+
+   ```
+   gerrit-user: <some gerrit service user>
+   gerrit-token: <token generated for the specified user>
+   github-token: <github personal access token>
+   jenkins-user: <some jenkins service user>
+   jenkins-token: <token generated for the specified user>
+   projects:
+     - sandbox
+   ```
+
+In step 2. it's also possible to use absolute paths instead of requiring it to be placed in `hooks` folder.
+
+In Storj environment it can be installed by `./deploy.sh`.
 
 Example of parameters used by gerrit:
 
@@ -12,7 +36,8 @@ Example of parameters used by gerrit:
 --change storj%2Fup~main~I684af6cd8a0c49baa7b55c2298fbd1974f5c56fe --kind REWORK --change-url https://review.dev.storj.io/c/storj/up/+/6241 --change-owner "Elek, Márton <marton@storj.io>" --change-owner-username elek --project storj/up --branch main --topic  --uploader "Elek, Márton <marton@storj.io>" --uploader-username elek --commit c72759e5db315f1cdbe9c8529cecc003f2c38f3e --patchset 3gerrit@gerrit
 ```
 
-The current implementation 
+The current implementation:
+
  * updates the linked Github issues with the Github token stored
  * Trigger jenkins build for some comments (-verify / premerge)
 
