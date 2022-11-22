@@ -20,13 +20,15 @@ var gerritBaseURL = "https://review.dev.storj.io"
 
 // Client is a Gerrit Rest client.
 type Client struct {
+	user  string
 	token string
 	log   *zap.Logger
 }
 
 // NewClient creates a new Gerrit REST client.
-func NewClient(log *zap.Logger, token string) Client {
+func NewClient(log *zap.Logger, user, token string) Client {
 	return Client{
+		user:  user,
 		token: token,
 		log:   log,
 	}
@@ -50,7 +52,7 @@ func (g *Client) doAPICall(ctx context.Context, url string, request interface{},
 	if err != nil {
 		return errs.Wrap(err)
 	}
-	httpRequest.SetBasicAuth("gerrit-trigger", g.token)
+	httpRequest.SetBasicAuth(g.user, g.token)
 	httpRequest.Header.Set("Content-Type", "application/json")
 
 	httpResponse, err := http.DefaultClient.Do(httpRequest)
