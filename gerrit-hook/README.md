@@ -5,13 +5,12 @@ Gerrit-hook can handle any type of gerrit hooks.
 To install:
 
 1. Add `gerrit-hook` binary to `$GERRIT_SITE/hooks` folder.
-2. Configure `$GERRIT_SITE/etc/config` with:
+2. Create symlinks in `$GERRIT_SITE/hooks` folder (NB: gerrit-hook uses the binary name to determine the action):
 
    ```
-   [hooks]
-      commentAddedHook = gerrit-hook
-      patchsetCreatedHook = gerrit-hook
-      refUpdatedHook = gerrit-hook
+   ln -s gerrit-hook comment-added
+   ln -s gerrit-hook patchset-created
+   ln -s gerrit-hook ref-updated
    ```
 
 3. Configure `$GERRIT_HOME/.config/gerrit-hook/config.yaml`:
@@ -37,8 +36,6 @@ To install:
    projects:
      - sandbox
    ```
-
-In step 2. it's also possible to use absolute paths instead of requiring it to be placed in `hooks` folder.
 
 In Storj environment it can be installed by `./deploy.sh`.
 
