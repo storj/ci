@@ -42,9 +42,9 @@ func AddComment(ctx context.Context, gr gerrit.Client, project string, change st
 
 	previousMessage := ""
 
-	// for some reason https://review.dev.storj.io/changes/<ID>>/revisions/0/commit is not available
-	// for initial push, fortunately we don't need previousMessage in that case.
-	if patchset != "" && patchset != "0" {
+	// The first patchset is numbered 1, hence we shouldn't request the previous message for it.
+	// This only happens on initial push.
+	if patchset != "" && patchset != "0" && patchset != "1" {
 		p, err := strconv.Atoi(patchset)
 		if err != nil {
 			return err
