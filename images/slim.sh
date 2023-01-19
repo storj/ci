@@ -2,9 +2,12 @@ set -euo pipefail
 
 # Older versions of Go
 
-go install golang.org/dl/go1.14@latest && go1.14 download
-go install golang.org/dl/go1.16.15@latest && go1.16.15 download
+# do not remove go1.17.13 some uplink binary tests require an older Go version.
 go install golang.org/dl/go1.17.13@latest && go1.17.13 download
+# minimum version supported by our packages.
+go install golang.org/dl/go1.18.10@latest && \
+    mv $(go env GOPATH)/bin/go1.18.10 $(go env GOPATH)/bin/go.min && \
+    go.min download
 
 # Tooling
 
