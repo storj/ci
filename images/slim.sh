@@ -1,5 +1,9 @@
 set -euo pipefail
 
+# Disable safe.directory https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory,
+# because we are running in containerized environment anyways.
+git config --global --add safe.directory '*'
+
 # Older versions of Go
 
 # do not remove go1.17.13 some uplink binary tests require an older Go version.

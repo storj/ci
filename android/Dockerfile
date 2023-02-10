@@ -1,4 +1,8 @@
-FROM golang:1.18.8
+FROM golang:1.19.5
+
+# Disable safe.directory https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory,
+# because we are running in containerized environment anyways.
+RUN git config --global --add safe.directory '*'
 
 # Postgres
 RUN curl -sf https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
