@@ -32,7 +32,6 @@ linters:
     - noctx                   # finds locations that should use context
     - nolintlint              # checks that nolint directives are correct
     - revive                  # check standard linting rules
-    - staticcheck             # comprehensive checks
     - tenv                    # ensure we use t.SetEnv instead of os.SetEnv
     - unconvert               # remove unnecessary conversions
     - wastedassign
@@ -46,6 +45,7 @@ linters:
     #TODO#- unparam           # check for unused parameters
     #TODO#- whitespace        # checks for leading/trailing newlines
   disable:
+    - staticcheck      # we already use staticcheck separately
     - asciicheck       # non-ascii is allowed
     - containedctx     # gives false positives, however might be good to re-evaluate
     - contextcheck     # doesn't look like it's useful
