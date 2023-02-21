@@ -50,7 +50,7 @@ func (c *Client) TriggerJob(ctx context.Context, job string, parameters map[stri
 }
 
 func (c *Client) jenkinsHTTPCall(ctx context.Context, url string, result interface{}) error {
-	httpRequest, err := http.NewRequestWithContext(ctx, "POST", url, nil)
+	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
 	if err != nil {
 		return errs.Wrap(err)
 	}

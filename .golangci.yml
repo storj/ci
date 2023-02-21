@@ -7,7 +7,6 @@ run:
     - ".*\\.pb\\.go$"
     - ".*\\.dbx\\.go$"
 
-
 linters:
   enable:
     - bidichk                 # find dangerous bidi unicode symbols
