@@ -27,21 +27,21 @@ func main() {
 
 	leftover := skipEmpty(strings.Split(stdout.String(), "\n"))
 
+	// Jenkins sometimes creates @tmp folders, files that we cannot do anything about.
+	leftover = discard(leftover, func(file string) bool {
+		return strings.Contains(file, "@tmp")
+	})
+
 	if len(leftover) != 0 {
 		fmt.Println("Files left-over after running tests.")
 		os.Exit(1)
 	}
 }
 
-var _ = ignorePrefix // we may need this in the future
-
-func ignorePrefix(files []string, dir string) []string {
+func discard(files []string, fn func(file string) bool) []string {
 	result := files[:0]
 	for _, file := range files {
-		if file == "" {
-			continue
-		}
-		if strings.HasPrefix(file, dir) {
+		if fn(file) {
 			continue
 		}
 		result = append(result, file)
@@ -50,12 +50,5 @@ func ignorePrefix(files []string, dir string) []string {
 }
 
 func skipEmpty(files []string) []string {
-	result := files[:0]
-	for _, file := range files {
-		if file == "" {
-			continue
-		}
-		result = append(result, file)
-	}
-	return result
+	return discard(files, func(file string) bool { return file == "" })
 }
