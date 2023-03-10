@@ -37,7 +37,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2 && \
     go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
     go install github.com/axw/gocov/gocov@v1.0.0  && \
     go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 && \
-    go install github.com/google/go-licenses@ceb292363ec84358c9a276ef23aa0de893e59b84 && \
+    go install github.com/google/go-licenses@v1.6.0 && \
     go install github.com/magefile/mage@v1.11.0
 
 apt-get install -yq clang-format

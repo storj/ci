@@ -65,7 +65,7 @@ RUN yes | sdkmanager \
     "system-images;android-24;default;x86_64"
 
 # Install go-licenses
-RUN go install github.com/google/go-licenses@v1.5.0
+RUN go install github.com/google/go-licenses@v1.6.0
 
 # Tools in this repository
 COPY . /go/ci
