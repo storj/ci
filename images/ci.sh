@@ -20,4 +20,4 @@ curl -sfL https://github.com/duplicati/duplicati/releases/download/v2.0.5.114-2.
 apt -y install /tmp/duplicati.deb
 
 # Requirements for UI tests
-DEBIAN_FRONTEND="noninteractive" apt install -y chromium xorg xvfb gtk2-engines-pixbuf dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable imagemagick x11-apps
+npx playwright install-deps
