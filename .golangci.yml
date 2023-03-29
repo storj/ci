@@ -178,12 +178,24 @@ issues:
     - linters:
         - goerr113
       text: "do not define dynamic errors"
-    - linters:
+    - linters: # uninteresting, it would be nice to be consistent, but we don't want to block the build for it
         - revive
       text: "if-return"
-    - linters: # false-positives for c exports
+    - linters: # a lot of false-positives for c exports
         - revive
       text: "var-naming"
-    - linters: # uninteresting
+    - linters: # uninteresting, ideally we would have this on, but we need to fix all the packages first
         - revive
       text: "package-comments"
+    - linters: # uninteresting, it would be nice to be consistent, but we don't want to block the build for it
+        - revive
+      text: "superfluous-else"
+    - linters: # uninteresting, it's common to leave args unused
+        - revive
+      text: "unused-parameter"
+    - linters: # false positives, see https://github.com/mgechev/revive/issues/810
+        - revive
+      text: "empty-block"
+    - linters: # uninteresting, it's fine to redefine builtins
+        - revive
+      text: "redefines-builtin-id"

@@ -19,7 +19,7 @@ func TriggeredByComment(ctx context.Context, log *zap.Logger, jc Client, gc gerr
 		return err
 	}
 
-	buildType := ""
+	var buildType string
 	if strings.Contains(comment, "run jenkins verify") {
 		buildType = "verify"
 	} else if strings.Contains(comment, "run jenkins pre-merge") || strings.Contains(comment, "run jenkins premerge") {
@@ -66,7 +66,7 @@ func TriggeredByAnyChange(ctx context.Context, log *zap.Logger, jc Client, gc ge
 
 	// most important: check the current state
 
-	buildType := ""
+	var buildType string
 	if change.LabelMax("Verified") == 0 {
 		buildType = "verify"
 	}
