@@ -144,7 +144,7 @@ func (ci *ChangeInfo) HasVerified() bool {
 	}
 
 	for _, vote := range ci.Labels["Verified"].All {
-		if vote.Value != 0 {
+		if vote.Value == -1 || vote.Value == 2 {
 			return true
 		}
 	}

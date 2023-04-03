@@ -31,18 +31,21 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 		return nil, errs.Wrap(err)
 	}
 
-	cis = filter(cis, func(ci *ChangeInfo) bool {
-		return !ci.HasVerified() || ci.Verified()
-	})
-
 	for _, ci := range cis {
 		err = c.query("GET", ci.actionURL("related"), &ci)
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
 
-		err = c.query("GET", ci.infoURL("messages"), &ci)
+		err = c.query("GET", ci.infoURL("messages"), &ci.Messages)
+		if err != nil {
+			return nil, errs.Wrap(err)
+		}
 	}
+
+	cis = filter(cis, func(ci *ChangeInfo) bool {
+		return !ci.HasVerified() || ci.Verified()
+	})
 
 	sort.Slice(cis, func(i, j int) bool {
 		return cis[i].Number < cis[j].Number
