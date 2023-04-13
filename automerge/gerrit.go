@@ -21,7 +21,7 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 	q := strings.Join([]string{
 		"status:open",
 		"label:Code-Review=2,count>=2",
-		"-label:Code-Review<-1",
+		"-label:Code-Review<=-1",
 		"-has:unresolved",
 		"-is:wip",
 	}, "+")
