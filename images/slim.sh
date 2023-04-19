@@ -34,9 +34,9 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52.2 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
     go install honnef.co/go/tools/cmd/staticcheck@2023.1.3 && \
     # Output formatters \
-    go install github.com/mfridman/tparse@36f80740879e24ba6695649290a240c5908ffcbb  && \
-    go install github.com/axw/gocov/gocov@v1.0.0  && \
-    go install github.com/AlekSi/gocov-xml@3a14fb1c4737b3995174c5f4d6d08a348b9b4180 && \
+    go install github.com/mfridman/tparse@v0.12.1   && \
+    go install github.com/axw/gocov/gocov@v1.1.0    && \
+    go install github.com/AlekSi/gocov-xml@v1.1.0   && \
     go install github.com/google/go-licenses@v1.6.0 && \
     go install github.com/magefile/mage@v1.11.0
 
