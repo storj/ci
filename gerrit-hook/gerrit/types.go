@@ -83,7 +83,8 @@ type Message struct {
 	RevisionNumber int    `json:"_revision_number"`
 }
 
-// Commit represents a commit message.
+// Commit represents a commit.
 type Commit struct {
+	Subject string `json:"subject"`
 	Message string `json:"message"`
 }

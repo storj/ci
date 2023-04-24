@@ -81,15 +81,15 @@ func (g *Client) doAPICall(ctx context.Context, url string, request interface{},
 	return nil
 }
 
-// GetCommitMessage retrieves the last long commit message of a gerrit patch.
-func (g *Client) GetCommitMessage(ctx context.Context, changesetID string, commit string) (string, error) {
+// GetCommit retrieves the commit of a gerrit patch.
+func (g *Client) GetCommit(ctx context.Context, changesetID string, commit string) (Commit, error) {
 	c := Commit{}
 	url := fmt.Sprintf("%s/changes/%s/revisions/%s/commit", gerritBaseURL, changesetID, commit)
 	err := g.doAPICall(ctx, url, nil, &c)
 	if err != nil {
-		return "", err
+		return Commit{}, err
 	}
-	return c.Message, nil
+	return c, nil
 
 }
 

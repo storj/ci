@@ -35,12 +35,12 @@ func NewClient(log *zap.Logger, client *http.Client) Client {
 
 // AddComment handles incoming hook call by gerrit for patchset-created events.
 func AddComment(ctx context.Context, gr gerrit.Client, project string, change string, commit string, changeURL string, patchset string, postComment func(ctc context.Context, orgRepo string, issue string, message string) error) error {
-	message, err := gr.GetCommitMessage(ctx, change, commit)
+	fullCommit, err := gr.GetCommit(ctx, change, commit)
 	if err != nil {
 		return err
 	}
 
-	previousMessage := ""
+	previousFullCommit := gerrit.Commit{}
 
 	// The first patchset is numbered 1, hence we shouldn't request the previous message for it.
 	// This only happens on initial push.
@@ -50,21 +50,21 @@ func AddComment(ctx context.Context, gr gerrit.Client, project string, change st
 			return err
 		}
 
-		previousMessage, err = gr.GetCommitMessage(ctx, change, strconv.Itoa(p-1))
+		previousFullCommit, err = gr.GetCommit(ctx, change, strconv.Itoa(p-1))
 		if err != nil {
 			return err
 		}
 	}
 
-	currentRefs := findGithubRefs(message)
-	oldRefs := findGithubRefs(previousMessage)
+	currentRefs := findGithubRefs(fullCommit.Message)
+	oldRefs := findGithubRefs(previousFullCommit.Message)
 	newRefs := subtractRefs(currentRefs, oldRefs)
 
 	for _, ref := range newRefs {
 		if ref.repo == "" {
 			ref.repo = project
 		}
-		comment := fmt.Sprintf("Change %s mentions this issue.", changeURL)
+		comment := fmt.Sprintf("Change [%s](%s) mentions this issue.", fullCommit.Subject, changeURL)
 		if err := postComment(ctx, ref.repo, ref.issue, comment); err != nil {
 			return err
 		}
