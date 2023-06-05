@@ -16,6 +16,7 @@ node('node') {
       sh 'make build-image IMAGE_NAME=ci-slim'
       sh 'make build-image IMAGE_NAME=ci-deps'
       sh 'make build-image IMAGE_NAME=ci'
+      sh 'make build-image IMAGE_NAME=ci-ui'
 
       echo "Current build result: ${currentBuild.result}"
     }

@@ -18,8 +18,3 @@ go install github.com/rclone/rclone/fstest/test_all@v1.58.0
 apt-get -y install mono-devel
 curl -sfL https://github.com/duplicati/duplicati/releases/download/v2.0.5.114-2.0.5.114_canary_2021-03-10/duplicati_2.0.5.114-1_all.deb -o /tmp/duplicati.deb
 apt -y install /tmp/duplicati.deb
-
-# Requirements for UI tests
-npx playwright install-deps
-npx playwright install
-npm install -D @playwright/test

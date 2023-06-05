@@ -1,6 +1,6 @@
-REGISTRY_HOST ?= storjlabs
+REGISTRY_HOST ?= storjqa
 
-IMAGE_NAME = ci
+IMAGE_NAME = ci-ui
 IMAGE_TAG = latest
 
 IMAGE_FULL = $(REGISTRY_HOST)/$(IMAGE_NAME):$(IMAGE_TAG)
@@ -12,7 +12,7 @@ build-image:
 	docker buildx build . \
 		--pull \
 		-f images/$(IMAGE_NAME)/Dockerfile \
-		--platform linux/amd64,linux/arm64 \
+		--platform linux/amd64 \
 		--tag $(IMAGE_FULL)
 
 ## push-image's invocation of buildx will reuse parts from the docker build cache where possible. So this may seem like
