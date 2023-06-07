@@ -12,12 +12,7 @@ RUN bash images/slim.sh
 COPY images/deps.sh images/deps.sh
 RUN bash images/deps.sh
 
-# ci:full
-
-COPY scripts scripts
-COPY images/ci.sh images/ci.sh
-ENV PATH="$PATH:/root/bin"
-RUN bash images/ci.sh
+# ci:
 
 # ci:ui
 
