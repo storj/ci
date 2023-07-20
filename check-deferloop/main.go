@@ -26,23 +26,40 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	inspect.Nodes([]ast.Node{
-		(*ast.ForStmt)(nil),
-	}, func(n ast.Node, push bool) (proceed bool) {
+	inspect.WithStack([]ast.Node{
+		(*ast.DeferStmt)(nil),
+	}, func(defern ast.Node, push bool, stack []ast.Node) (proceed bool) {
 		if push {
 			return true
 		}
 
-		ast.Inspect(n, func(n ast.Node) bool {
-			switch n := n.(type) {
-			case *ast.DeferStmt:
-				pass.Reportf(n.Pos(), "defer inside a loop")
-				return false
-			case *ast.ExprStmt, *ast.FuncLit:
-				return false
+		// check if we are deferring and immediately returning
+		if parent, ok := stack[len(stack)-2].(*ast.BlockStmt); ok {
+			check := false
+			for _, v := range parent.List {
+				if v == defern {
+					check = true
+					continue
+				}
+				if check {
+					if _, returned := v.(*ast.ReturnStmt); returned {
+						return true
+					}
+				}
 			}
-			return true
-		})
+		}
+
+	check:
+		for i := len(stack) - 1; i >= 0; i-- {
+			n := stack[i]
+			switch n.(type) {
+			case *ast.ForStmt:
+				pass.Reportf(defern.Pos(), "defer inside a loop")
+				break check
+			case *ast.ExprStmt, *ast.FuncLit:
+				break check
+			}
+		}
 
 		return true
 	})

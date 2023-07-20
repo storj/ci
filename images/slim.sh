@@ -1,4 +1,4 @@
-set -euo pipefail
+set -xeuo pipefail
 
 # Disable safe.directory https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory,
 # because we are running in containerized environment anyways.
@@ -15,10 +15,10 @@ go install golang.org/dl/go1.18.10@latest && \
 
 # Tooling
 
-curl -sfL https://deb.nodesource.com/setup_16.x  | bash -
+curl -sfL https://deb.nodesource.com/setup_18.x  | bash -
 apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y brotli unzip libuv1-dev libjson-c-dev nettle-dev nodejs
-npm install -g npm@8.15.1
-npm install -g pnpm@v7
+npm install -g npm@9.6.7
+npm install -g pnpm@v8
 
 curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protoc-3.12.3-linux-x86_64.zip -o /tmp/protoc.zip && unzip /tmp/protoc.zip -d "$HOME"/protoc
 

@@ -1,4 +1,4 @@
-FROM golang:1.20.3
+FROM golang:1.20.6
 
 WORKDIR /go/ci
 

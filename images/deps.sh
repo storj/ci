@@ -1,4 +1,4 @@
-set -euo pipefail
+set -xeuo pipefail
 
 # CockroachDB
 
@@ -8,7 +8,7 @@ cp -i cockroach-v22.2.11.linux-amd64/cockroach /usr/local/bin/
 # Postgres
 
 curl -sf https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-echo "deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
+echo "deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
 
 apt-get update && apt-get install -y -qq postgresql-13 redis-server
 

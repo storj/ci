@@ -41,3 +41,12 @@ func _() {
 		_ = x
 	}
 }
+
+func _() {
+	for {
+		if true {
+			defer func() {}()
+			return
+		}
+	}
+}
