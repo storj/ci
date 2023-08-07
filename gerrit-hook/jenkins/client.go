@@ -15,6 +15,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const jenkinsBaseURL = "https://build.dev.storj.tools"
+
 // Client contains all the information to call jenkins instances.
 type Client struct {
 	Username string
@@ -45,7 +47,7 @@ func (c *Client) TriggerJob(ctx context.Context, job string, parameters map[stri
 	for k, v := range parameters {
 		params = append(params, k+"="+v)
 	}
-	triggerURL := fmt.Sprintf("https://build.dev.storj.io/job/%s/buildWithParameters?%s", job, strings.Join(params, "="))
+	triggerURL := fmt.Sprintf("%s/job/%s/buildWithParameters?%s", jenkinsBaseURL, job, strings.Join(params, "="))
 	return c.jenkinsHTTPCall(ctx, triggerURL, nil)
 }
 
