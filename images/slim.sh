@@ -9,8 +9,8 @@ git config --global --add safe.directory '*'
 # do not remove go1.17.13 some uplink binary tests require an older Go version.
 go install golang.org/dl/go1.17.13@latest && go1.17.13 download
 # minimum version supported by our packages.
-go install golang.org/dl/go1.18.10@latest && \
-    mv $(go env GOPATH)/bin/go1.18.10 $(go env GOPATH)/bin/go.min && \
+go install golang.org/dl/go1.19.12@latest && \
+    mv $(go env GOPATH)/bin/go1.19.12 $(go env GOPATH)/bin/go.min && \
     go.min download
 
 # Tooling
@@ -28,7 +28,7 @@ curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/
 apt-get -y install shellcheck
 
 # Linters, formatters, build tools
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52.2 && \
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.0 && \
     go install github.com/ckaznocha/protoc-gen-lint@v0.3.0 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.16.0 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
