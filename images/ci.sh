@@ -2,9 +2,6 @@ set -xeuo pipefail
 
 bash ./scripts/install-awscli.sh
 
-# Android/Java binding tests
-apt-get install -y default-jre
-
 ## Tools for gateway testing
 apt-get install -y s3fs
 # Duplicity backup tool for S3 gateway test scenarios

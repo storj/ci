@@ -11,20 +11,18 @@ node('node') {
       echo "Current build result: ${currentBuild.result}"
     }
 
-    stage('Build image') {
+    stage('Build images') {
       lastStage = env.STAGE_NAME
-      sh 'make build-image IMAGE_NAME=ci-slim'
-      sh 'make build-image IMAGE_NAME=ci-deps'
-      sh 'make build-image IMAGE_NAME=ci'
+
+      sh 'make build-images'
 
       echo "Current build result: ${currentBuild.result}"
     }
 
-    stage('Push image') {
+    stage('Push images') {
       lastStage = env.STAGE_NAME
-      sh 'make push-image IMAGE_NAME=ci-slim'
-      sh 'make push-image IMAGE_NAME=ci-deps'
-      sh 'make push-image IMAGE_NAME=ci'
+
+      sh 'make push-images'
 
       echo "Current build result: ${currentBuild.result}"
     }

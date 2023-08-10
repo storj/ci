@@ -1,31 +1,29 @@
 REGISTRY_HOST ?= storjlabs
 
-IMAGE_NAME = ci
-IMAGE_TAG = latest
+.PHONY: build-slim
+build-slim:
+	docker build \
+		--tag $(REGISTRY_HOST)/ci:slim \
+		-f images/ci-slim/Dockerfile .
 
-IMAGE_FULL = $(REGISTRY_HOST)/$(IMAGE_NAME):$(IMAGE_TAG)
-
-## build-image will not produce a usable image reference as buildx is unable to load into docker with it's current set
-## of drivers (docker, docker-container, kubernetes).
-.PHONY: build-image
-build-image:
-	docker buildx build . \
+.PHONY: build-images
+build-images:
+	docker buildx build \
 		--pull \
-		-f images/$(IMAGE_NAME)/Dockerfile \
-		--platform linux/amd64,linux/arm64 \
-		--tag $(IMAGE_FULL)
+		--tag $(REGISTRY_HOST)/ci:latest \
+		--platform linux/amd64 \
+		-f images/ci/Dockerfile .
 
-## push-image's invocation of buildx will reuse parts from the docker build cache where possible. So this may seem like
-## we're rebuilding the image, but we're likely just pulling from the layer cache.
-.PHONY: push-image
-push-image:
-	docker buildx build . \
-		--pull \
-		-f images/$(IMAGE_NAME)/Dockerfile \
+	docker buildx build \
+		--tag $(REGISTRY_HOST)/ci:slim \
 		--platform linux/amd64,linux/arm64 \
-		--tag $(IMAGE_FULL) \
-		--push
+		-f images/ci-slim/Dockerfile .
+
+.PHONY: push-images
+push-images:
+	docker push $(REGISTRY_HOST)/ci:latest
+	docker push $(REGISTRY_HOST)/ci:slim
 
 .PHONY: clean
 clean:
-	docker buildx prune
+	docker rmi $(REGISTRY_HOST)/ci:latest $(REGISTRY_HOST)/ci:slim
