@@ -9,12 +9,14 @@ build-slim:
 .PHONY: build-images
 build-images:
 	docker buildx build \
+		--load \
 		--pull \
 		--tag $(REGISTRY_HOST)/ci:latest \
 		--platform linux/amd64 \
 		-f images/ci/Dockerfile .
 
 	docker buildx build \
+		--load \
 		--tag $(REGISTRY_HOST)/ci:slim \
 		--platform linux/amd64,linux/arm64 \
 		-f images/ci-slim/Dockerfile .
