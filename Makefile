@@ -6,25 +6,20 @@ build-slim:
 		--tag $(REGISTRY_HOST)/ci:slim \
 		-f images/ci-slim/Dockerfile .
 
-.PHONY: build-images
-build-images:
+.PHONY: build-and-push-images
+build-and-push-images:
 	docker buildx build \
-		--load \
+		--push \
 		--pull \
 		--tag $(REGISTRY_HOST)/ci:latest \
 		--platform linux/amd64 \
 		-f images/ci/Dockerfile .
 
 	docker buildx build \
-		--load \
+		--push \
 		--tag $(REGISTRY_HOST)/ci:slim \
 		--platform linux/amd64,linux/arm64 \
 		-f images/ci-slim/Dockerfile .
-
-.PHONY: push-images
-push-images:
-	docker push $(REGISTRY_HOST)/ci:latest
-	docker push $(REGISTRY_HOST)/ci:slim
 
 .PHONY: clean
 clean:
