@@ -32,7 +32,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.1 && \
     go install github.com/ckaznocha/protoc-gen-lint@v0.3.0 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.16.0 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
-    go install honnef.co/go/tools/cmd/staticcheck@2023.1.3 && \
+    go install honnef.co/go/tools/cmd/staticcheck@2023.1.5 && \
     # Output formatters \
     go install github.com/mfridman/tparse@v0.12.1   && \
     go install github.com/axw/gocov/gocov@v1.1.0    && \
