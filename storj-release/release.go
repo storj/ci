@@ -88,6 +88,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if env.GoVersion == "" {
+		_, _ = fmt.Fprintf(os.Stderr, "Please specify go version with -go-version (tag of storjlabs/golang Docker image)")
+		os.Exit(1)
+	}
+
 	env.LDFLAGS = strings.TrimSpace(os.Getenv("LDFLAGS"))
 
 	gopath, err := getGoEnv("GOPATH")
@@ -323,7 +328,6 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		// setup correct os/arch
 		"-e", "GOOS=" + osarch.Os, "-e", "GOARCH=" + osarch.Arch,
 		"-e", "GOARM=6", "-e", "CGO_ENABLED=" + env.CGOENABLED,
-		"-e", "LDFLAGS=" + ldFlags,
 		// use goproxy
 		"-e", "GOPROXY",
 		// use our golang image
@@ -331,7 +335,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 	}
 
 	buildArgs := []string{
-		"go", "build", "-o", filepath.ToSlash(binaryPath),
+		"go", "build", "-ldflags", ldFlags, "-o", filepath.ToSlash(binaryPath),
 	}
 	if buildTags != "" {
 		buildArgs = append(buildArgs, "-tags", buildTags)
