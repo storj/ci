@@ -20,6 +20,8 @@ func TriggeredByComment(ctx context.Context, log *zap.Logger, jc Client, gc gerr
 	}
 
 	var buildType string
+
+	comment = strings.ToLower(comment)
 	if strings.Contains(comment, "run jenkins verify") {
 		buildType = "verify"
 	} else if strings.Contains(comment, "run jenkins pre-merge") || strings.Contains(comment, "run jenkins premerge") {
