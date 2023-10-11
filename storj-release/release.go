@@ -62,7 +62,7 @@ type Env struct {
 	GoVersion        string
 	PackageCachePath string
 	CGOENABLED       string
-	LDFLAGS          string
+	ldflags          string
 }
 
 func main() {
@@ -74,6 +74,7 @@ func main() {
 	flag.StringVar(&buildName, "build-name", "", "build name if building root of repo instead of providing a component list")
 	flag.StringVar(&env.GoVersion, "go-version", "", "go version to use for building the image")
 	flag.StringVar(&buildTags, "build-tags", "", "build tags")
+	flag.StringVar(&env.ldflags, "ldflags", os.Getenv("LDFLAGS"), "linker flags")
 
 	flag.StringVar(&osArches, "osarches", "", "comma-separated list of os/arch to build for")
 	flag.StringVar(&skipOsArches, "skip-osarches", "", "comma-separated list of os/arch to skip build for")
@@ -87,8 +88,6 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to get working directory: %v\n", err)
 		os.Exit(1)
 	}
-
-	env.LDFLAGS = strings.TrimSpace(os.Getenv("LDFLAGS"))
 
 	gopath, err := getGoEnv("GOPATH")
 	if err != nil {
@@ -303,12 +302,13 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		return fmt.Errorf("could not get current user: %w", err)
 	}
 
-	ldFlags := fmt.Sprintf("-X storj.io/private/version.buildTimestamp=%d ", env.Commit.Timestamp.Unix()) +
+	ldflags := fmt.Sprintf("-X storj.io/private/version.buildTimestamp=%d ", env.Commit.Timestamp.Unix()) +
 		fmt.Sprintf("-X storj.io/private/version.buildCommitHash=%s ", env.Commit.Hash) +
 		fmt.Sprintf("-X storj.io/private/version.buildVersion=%s ", env.Commit.Version.String()) +
 		fmt.Sprintf("-X storj.io/private/version.buildRelease=%t ", env.Commit.Release)
-	if env.LDFLAGS != "" {
-		ldFlags = ldFlags + " " + env.LDFLAGS
+
+	if env.ldflags != "" {
+		ldflags += " " + env.ldflags
 	}
 
 	runArgs := []string{
@@ -323,7 +323,6 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		// setup correct os/arch
 		"-e", "GOOS=" + osarch.Os, "-e", "GOARCH=" + osarch.Arch,
 		"-e", "GOARM=6", "-e", "CGO_ENABLED=" + env.CGOENABLED,
-		"-e", "LDFLAGS=" + ldFlags,
 		// use goproxy
 		"-e", "GOPROXY",
 		// use our golang image
@@ -332,7 +331,9 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 
 	buildArgs := []string{
 		"go", "build", "-o", filepath.ToSlash(binaryPath),
+		"-ldflags", ldflags,
 	}
+
 	if buildTags != "" {
 		buildArgs = append(buildArgs, "-tags", buildTags)
 	}
