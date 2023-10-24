@@ -190,6 +190,9 @@ issues:
     - linters: # uninteresting, it would be nice to be consistent, but we don't want to block the build for it
         - revive
       text: "superfluous-else"
+    - linters: # uninteresting, it would be nice to be consistent, but we don't want to block the build for it
+        - revive
+      text: "indent-error-flow"
     - linters: # uninteresting, it's common to leave args unused
         - revive
       text: "unused-parameter"
