@@ -184,6 +184,9 @@ issues:
     - linters: # a lot of false-positives for c exports
         - revive
       text: "var-naming"
+    - linters: # uninteresting, error doesn't need to be the last type
+        - revive
+      text: "error-return"
     - linters: # uninteresting, ideally we would have this on, but we need to fix all the packages first
         - revive
       text: "package-comments"
