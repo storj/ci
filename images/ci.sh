@@ -6,6 +6,8 @@ bash ./scripts/install-awscli.sh
 apt-get install -y s3fs
 # Duplicity backup tool for S3 gateway test scenarios
 apt-get install -y duplicity python3-pip python3-boto3
+# Tool for running github.com/ceph/s3-tests for gateway
+apt-get install -y tox
 
 # rclone and test tool for S3 gateway test scenarios
 go install github.com/rclone/rclone@v1.58.0
