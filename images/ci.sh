@@ -10,8 +10,8 @@ apt-get install -y duplicity python3-pip python3-boto3
 apt-get install -y tox
 
 # rclone and test tool for S3 gateway test scenarios
-go install github.com/rclone/rclone@v1.58.0
-go install github.com/rclone/rclone/fstest/test_all@v1.58.0
+go install github.com/rclone/rclone@v1.65.0
+go install github.com/rclone/rclone/fstest/test_all@v1.65.0
 
 # Duplicati backup tool for S3 gateway test scenarios
 apt-get -y install mono-devel
