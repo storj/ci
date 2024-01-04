@@ -39,7 +39,7 @@ func main() {
 }
 
 func run(ctx context.Context, cl *Client) error {
-	cis, err := cl.GetChangeInfos()
+	cis, err := cl.GetChangeInfos(ctx)
 	if err != nil {
 		return errs.Wrap(err)
 	}
@@ -74,7 +74,7 @@ func run(ctx context.Context, cl *Client) error {
 
 	if submits := filter(cis, (*ChangeInfo).CanMerge); len(submits) > 0 {
 		fmt.Println("Submit", submits[0].ViewURL(cl.base))
-		return cl.Submit(submits[0])
+		return cl.Submit(ctx, submits[0])
 	}
 
 	byProject := make(map[string][]*ChangeInfo)
@@ -87,7 +87,7 @@ func run(ctx context.Context, cl *Client) error {
 			if rebases := filter(cis, (*ChangeInfo).CanRebase); len(rebases) > 0 {
 				for _, rebase := range rebases {
 					fmt.Println("Rebase", rebase.ViewURL(cl.base))
-					if err := cl.Rebase(rebase); err == nil {
+					if err := cl.Rebase(ctx, rebase); err == nil {
 						break
 					}
 				}

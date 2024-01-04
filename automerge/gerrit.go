@@ -23,7 +23,7 @@ type Client struct {
 }
 
 // GetChangeInfos returns changes that can be potentially be automatically submitted.
-func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
+func (c *Client) GetChangeInfos(ctx context.Context) (cis []*ChangeInfo, err error) {
 	q := strings.Join([]string{
 		"status:open",
 		"label:Code-Review=2,count>=2",
@@ -32,18 +32,18 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 		"-is:wip",
 	}, "+")
 
-	err = c.query("GET", "changes/?q="+q+"&o=CURRENT_REVISION&o=SUBMITTABLE&o=MESSAGES&o=LABELS", &cis)
+	err = c.query(ctx, "GET", "changes/?q="+q+"&o=CURRENT_REVISION&o=SUBMITTABLE&o=MESSAGES&o=LABELS", &cis)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
 
 	for _, ci := range cis {
-		err = c.query("GET", ci.actionURL("related"), &ci)
+		err = c.query(ctx, "GET", ci.actionURL("related"), &ci)
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
 
-		err = c.query("GET", ci.infoURL("messages"), &ci.Messages)
+		err = c.query(ctx, "GET", ci.infoURL("messages"), &ci.Messages)
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
@@ -61,17 +61,17 @@ func (c *Client) GetChangeInfos() (cis []*ChangeInfo, err error) {
 }
 
 // Rebase rebases the specified change.
-func (c *Client) Rebase(ci *ChangeInfo) error {
-	return c.query("POST", ci.actionURL("rebase"), nil)
+func (c *Client) Rebase(ctx context.Context, ci *ChangeInfo) error {
+	return c.query(ctx, "POST", ci.actionURL("rebase"), nil)
 }
 
 // Submit submits the specified change.
-func (c *Client) Submit(ci *ChangeInfo) error {
-	return c.query("POST", ci.actionURL("submit"), nil)
+func (c *Client) Submit(ctx context.Context, ci *ChangeInfo) error {
+	return c.query(ctx, "POST", ci.actionURL("submit"), nil)
 }
 
-func (c *Client) query(method, endpoint string, into interface{}) error {
-	req, err := http.NewRequestWithContext(context.TODO(), method, c.base+"a/"+endpoint, nil)
+func (c *Client) query(ctx context.Context, method, endpoint string, into interface{}) error {
+	req, err := http.NewRequestWithContext(ctx, method, c.base+"a/"+endpoint, nil)
 	if err != nil {
 		return errs.Wrap(err)
 	}
