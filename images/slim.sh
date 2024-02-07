@@ -9,8 +9,8 @@ git config --global --add safe.directory '*'
 # do not remove go1.17.13 some uplink binary tests require an older Go version.
 go install golang.org/dl/go1.17.13@latest && go1.17.13 download
 # minimum version supported by our packages.
-go install golang.org/dl/go1.19.12@latest && \
-    mv $(go env GOPATH)/bin/go1.19.12 $(go env GOPATH)/bin/go.min && \
+go install golang.org/dl/go1.20.14@latest && \
+    mv $(go env GOPATH)/bin/go1.20.14 $(go env GOPATH)/bin/go.min && \
     go.min download
 
 # Tooling
