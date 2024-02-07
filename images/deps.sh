@@ -16,7 +16,7 @@ rm /etc/postgresql/13/main/pg_hba.conf
 echo 'local   all             all                                     trust' >> /etc/postgresql/13/main/pg_hba.conf
 echo 'host    all             all             127.0.0.1/8             trust' >> /etc/postgresql/13/main/pg_hba.conf
 echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/13/main/pg_hba.conf
-echo 'host    all             all            ::0/0                   trust' >> /etc/postgresql/13/main/pg_hba.conf
+echo 'host    all             all             ::0/0                   trust' >> /etc/postgresql/13/main/pg_hba.conf
 
 echo 'max_connections = 1000' >> /etc/postgresql/13/main/conf.d/connectionlimits.conf
 echo 'fsync = off' >> /etc/postgresql/13/main/conf.d/nosync.conf

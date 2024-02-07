@@ -1,12 +1,12 @@
 # tools image that we can cache
-FROM golang:1.21.6 AS tools
+FROM golang:1.22.0 AS tools
 
 WORKDIR /go/ci
 
 COPY . /go/ci
 RUN go install ./...
 
-FROM golang:1.21.6
+FROM golang:1.22.0
 
 WORKDIR /go/ci
 
