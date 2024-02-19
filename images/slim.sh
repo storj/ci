@@ -41,10 +41,10 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
     go install honnef.co/go/tools/cmd/staticcheck@2023.1.6 && \
     # Output formatters \
-    go install github.com/mfridman/tparse@v0.12.1   && \
+    go install github.com/mfridman/tparse@v0.13.2   && \
     go install github.com/axw/gocov/gocov@v1.1.0    && \
     go install github.com/AlekSi/gocov-xml@v1.1.0   && \
     go install github.com/google/go-licenses@v1.6.0 && \
-    go install github.com/magefile/mage@v1.11.0
+    go install github.com/magefile/mage@v1.15.0
 
 apt-get install -yq clang-format
