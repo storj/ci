@@ -38,6 +38,7 @@ var verbose bool
 func main() {
 	var ignore Strings
 	var check Strings
+	var except Strings
 	var includeTests bool
 
 	flag.BoolVar(&verbose, "verbose", false, "print debug information")
@@ -45,6 +46,7 @@ func main() {
 
 	flag.Var(&ignore, "ignore", "ignore packages matching regular expression when listing")
 	flag.Var(&check, "check", "succeeds when contains a package matching regular expression")
+	flag.Var(&except, "except", "ignore these matches in dependencies")
 
 	flag.Parse()
 
@@ -61,28 +63,15 @@ func main() {
 		panic(err)
 	}
 
-	var rxIgnore []*regexp.Regexp
-	for _, rxstr := range ignore {
-		rx, err := regexp.Compile(rxstr)
-		if err != nil {
-			panic(err)
-		}
-		rxIgnore = append(rxIgnore, rx)
-	}
-
-	var rxCheck []*regexp.Regexp
-	for _, rxstr := range check {
-		rx, err := regexp.Compile(rxstr)
-		if err != nil {
-			panic(err)
-		}
-		rxCheck = append(rxCheck, rx)
-	}
+	rxIgnore := stringsToRegexps(ignore)
+	rxCheck := stringsToRegexps(check)
+	rxExcept := stringsToRegexps(except)
 
 	if verbose {
 		fmt.Fprintln(os.Stderr, "loaded roots:", packagesToStrings(roots))
-		fmt.Fprintln(os.Stderr, "ignore-rx:", ignore)
-		fmt.Fprintln(os.Stderr, "check-rx:", check)
+		fmt.Fprintln(os.Stderr, "ignore:", ignore)
+		fmt.Fprintln(os.Stderr, "check:", check)
+		fmt.Fprintln(os.Stderr, "except:", except)
 	}
 
 	var exitCode int
@@ -97,7 +86,7 @@ func main() {
 			continue
 		}
 
-		if target := findPath(root, rxCheck); target != "" {
+		if target := findPath(root, rxCheck, rxExcept); target != "" {
 			fmt.Fprintln(os.Stderr, target)
 			exitCode = 1
 		}
@@ -106,7 +95,7 @@ func main() {
 	os.Exit(exitCode)
 }
 
-func findPath(pkg *packages.Package, match []*regexp.Regexp) string {
+func findPath(pkg *packages.Package, match, except []*regexp.Regexp) string {
 	checked := map[string]struct{}{}
 
 	var find func(int, *packages.Package) string
@@ -115,7 +104,9 @@ func findPath(pkg *packages.Package, match []*regexp.Regexp) string {
 			fmt.Fprintf(os.Stderr, "   %*s > %s\n", 4*ident, "", p.PkgPath)
 		}
 		if matched := matchesOne(p.PkgPath, match); matched != "" {
-			return matched
+			if exception := matchesOne(p.PkgPath, except); exception == "" {
+				return p.PkgPath + " /" + matched + "/"
+			}
 		}
 
 		checked[p.PkgPath] = struct{}{}
@@ -134,6 +125,17 @@ func findPath(pkg *packages.Package, match []*regexp.Regexp) string {
 	}
 
 	return find(0, pkg)
+}
+
+func stringsToRegexps(xs []string) (rxs []*regexp.Regexp) {
+	for _, x := range xs {
+		rx, err := regexp.Compile(x)
+		if err != nil {
+			panic(err)
+		}
+		rxs = append(rxs, rx)
+	}
+	return rxs
 }
 
 func matchesOne(s string, rxs []*regexp.Regexp) string {
