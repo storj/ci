@@ -302,10 +302,10 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		return fmt.Errorf("could not get current user: %w", err)
 	}
 
-	ldflags := fmt.Sprintf("-X storj.io/private/version.buildTimestamp=%d ", env.Commit.Timestamp.Unix()) +
-		fmt.Sprintf("-X storj.io/private/version.buildCommitHash=%s ", env.Commit.Hash) +
-		fmt.Sprintf("-X storj.io/private/version.buildVersion=%s ", env.Commit.Version.String()) +
-		fmt.Sprintf("-X storj.io/private/version.buildRelease=%t ", env.Commit.Release)
+	ldflags := fmt.Sprintf("-X storj.io/common/version.buildTimestamp=%d ", env.Commit.Timestamp.Unix()) +
+		fmt.Sprintf("-X storj.io/common/version.buildCommitHash=%s ", env.Commit.Hash) +
+		fmt.Sprintf("-X storj.io/common/version.buildVersion=%s ", env.Commit.Version.String()) +
+		fmt.Sprintf("-X storj.io/common/version.buildRelease=%t ", env.Commit.Release)
 
 	if env.ldflags != "" {
 		ldflags += " " + env.ldflags
