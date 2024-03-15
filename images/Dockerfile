@@ -71,5 +71,5 @@ RUN bash images/ci.sh
 # tools
 
 COPY --from=tools /go/ci    /go/ci
-COPY --from=tools /go/bin/* /go/
-COPY --from=rclone /go/bin/* /go/
+COPY --from=tools /go/bin/* /go/bin/
+COPY --from=rclone /go/bin/* /go/bin/
