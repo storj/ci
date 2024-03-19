@@ -73,7 +73,7 @@ func TriggeredByAnyChange(ctx context.Context, log *zap.Logger, jc Client, gc ge
 		buildType = "verify"
 	}
 
-	if change.LabelMax("Verified") == 1 && change.LabelCount("Code-Review", 2) > 1 && change.LabelMin("Code-Review") > -2 {
+	if change.LabelMax("Verified") == 1 && change.LabelCount("Code-Review", 2) > 1 && change.LabelMin("Code-Review") > -2 && change.Mergeable {
 		buildType = "premerge"
 	}
 
