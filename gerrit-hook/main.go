@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -48,7 +49,7 @@ func main() {
 
 	viper.SetConfigName("gerrit-hook")
 
-	j := jenkins.NewClient(log.Named("jenkins"), viper.GetString("jenkins-user"), viper.GetString("jenkins-token"))
+	j := jenkins.NewClient(log.Named("jenkins"), jenkinsInstances())
 
 	client := &http.Client{}
 	if appid := viper.GetString("github-appid"); appid != "" {
@@ -76,7 +77,7 @@ func main() {
 	// arguments are defined by gerrit hook system, usually (but not only) --key value about the build
 	argMap := map[string]string{}
 	for p := 1; p < len(os.Args); p++ {
-		if len(os.Args) > p && !strings.HasPrefix(os.Args[p+1], "--") {
+		if len(os.Args) > p+1 && !strings.HasPrefix(os.Args[p+1], "--") {
 			argMap[os.Args[p][2:]] = os.Args[p+1]
 			p++
 		}
@@ -119,21 +120,24 @@ func main() {
 			log.Error("Couldn't add github PR comment", zap.Error(err))
 		}
 
-		if enabledProject(argMap["project"]) {
-			err = jenkins.TriggeredByAnyChange(ctx, log, j, gr, argMap["project"], argMap["change"], argMap["commit"])
+		config := ReadTriggerConfig(ctx, log, gr, argMap["project"])
+		if config.Jenkins != "" {
+			err = jenkins.TriggeredByAnyChange(ctx, log, j, gr, config, argMap["change"], argMap["commit"])
 			if err != nil {
 				log.Error("Couldn't trigger new jenkins build", zap.Error(err))
 			}
 		}
 	case "comment-added":
-		if enabledProject(argMap["project"]) {
-			err := jenkins.TriggeredByComment(ctx, log, j, gr, argMap["project"], argMap["change"], argMap["commit"], argMap["comment"])
+		config := ReadTriggerConfig(ctx, log, gr, argMap["project"])
+		if config.Jenkins != "" {
+			err := jenkins.TriggeredByComment(ctx, log, j, gr, config, argMap["change"], argMap["commit"], argMap["comment"])
 			if err != nil {
 				log.Error("Couldn't trigger new jenkins build", zap.Error(err))
 			}
 		}
 	case "ref-updated":
-		if enabledProject(argMap["project"]) {
+		config := ReadTriggerConfig(ctx, log, gr, argMap["project"])
+		if config.Jenkins != "" {
 			// in case of wip -> ready / ready -> wip state change, newrev=refs/changes/02/7902/meta
 
 			parts := strings.Split(argMap["refname"], "/")
@@ -143,7 +147,7 @@ func main() {
 					log.Error("ref-updated event but change couldn't be found", zap.Error(err))
 				}
 
-				err = jenkins.TriggeredByAnyChange(ctx, log, j, gr, change.Project, change.ChangeID, change.CurrentRevision)
+				err = jenkins.TriggeredByAnyChange(ctx, log, j, gr, config, change.ChangeID, change.CurrentRevision)
 				if err != nil {
 					log.Error("Couldn't trigger new jenkins build", zap.Error(err))
 				}
@@ -155,13 +159,59 @@ func main() {
 
 }
 
-func enabledProject(s string) bool {
-	for _, k := range viper.GetStringSlice("projects") {
-		if k == s {
-			return true
+// jenkinsInstances reads the configuration of Jenkins servers. Should be included in main viper config.
+func jenkinsInstances() map[string]jenkins.ClientConfig {
+	res := make(map[string]jenkins.ClientConfig)
+	for k, v := range viper.GetStringMap("jenkins") {
+		res[k] = jenkins.ClientConfig{
+			URL:   v.(map[string]interface{})["url"].(string),
+			User:  v.(map[string]interface{})["user"].(string),
+			Token: v.(map[string]interface{})["token"].(string),
 		}
 	}
-	return false
+	return res
+}
+
+// ReadTriggerConfig parses the [storj-trigger] section of the main gerrit project.config (from refs/meta/config branch).
+func ReadTriggerConfig(ctx context.Context, log *zap.Logger, gr gerrit.Client, project string) (res jenkins.TriggerConfig) {
+	content, err := gr.GetContent(ctx, project, "refs/meta/config", "project.config")
+	if err != nil {
+		log.Error("Error on reading project config", zap.Error(err))
+		return jenkins.TriggerConfig{}
+	}
+	decoded, err := base64.StdEncoding.DecodeString(content)
+	if err != nil {
+		log.Error("Invalid base64 encoding", zap.Error(err))
+		return jenkins.TriggerConfig{}
+	}
+	content = string(decoded)
+	var ourSection bool
+	for _, line := range strings.Split(content, "\n") {
+		if strings.HasPrefix(line, "[storj-trigger") {
+			ourSection = true
+			continue
+		}
+		if strings.HasPrefix(line, "[") {
+			ourSection = false
+		}
+		if ourSection {
+			k, v, _ := strings.Cut(line, "=")
+			v = strings.TrimSpace(v)
+			switch strings.TrimSpace(k) {
+			case "jenkins":
+				res.Jenkins = v
+			case "verify":
+				res.Verify = v
+			case "premerge":
+				res.PreMerge = v
+			case "":
+			default:
+				log.Warn("Unknown trigger config", zap.String("key", k), zap.String("project", project))
+			}
+
+		}
+	}
+	return res
 }
 
 func readArgFile(fileName string) (argMap map[string]string, action string, err error) {
@@ -175,6 +225,7 @@ func readArgFile(fileName string) (argMap map[string]string, action string, err 
 	key := ""
 	value := ""
 	for _, line := range strings.Split(string(content), "\n") {
+		line = strings.TrimSpace(line)
 		if action == "" {
 			action = path.Base(line)
 			continue
@@ -193,7 +244,7 @@ func readArgFile(fileName string) (argMap map[string]string, action string, err 
 		}
 	}
 	if key != "" {
-		argMap[key] = value
+		argMap[key] = strings.TrimSpace(value)
 	}
 	return argMap, action, nil
 }

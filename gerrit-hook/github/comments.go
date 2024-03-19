@@ -35,6 +35,7 @@ func NewClient(log *zap.Logger, client *http.Client) Client {
 
 // AddComment handles incoming hook call by gerrit for patchset-created events.
 func AddComment(ctx context.Context, gr gerrit.Client, project string, change string, commit string, changeURL string, patchset string, postComment func(ctc context.Context, orgRepo string, issue string, message string) error) error {
+
 	fullCommit, err := gr.GetCommit(ctx, change, commit)
 	if err != nil {
 		return err

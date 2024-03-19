@@ -34,7 +34,7 @@ func NewClient(log *zap.Logger, user, token string) Client {
 	}
 }
 
-func (g *Client) doAPICall(ctx context.Context, url string, request interface{}, result interface{}) error {
+func (g *Client) doAPICall(ctx context.Context, url string, request interface{}) ([]byte, error) {
 	var requestBody io.Reader
 	method := "GET"
 	if request != nil {
@@ -42,7 +42,7 @@ func (g *Client) doAPICall(ctx context.Context, url string, request interface{},
 
 		c, err := json.Marshal(request)
 		if err != nil {
-			return errs.Wrap(err)
+			return nil, errs.Wrap(err)
 		}
 
 		requestBody = strings.NewReader(string(c))
@@ -50,26 +50,33 @@ func (g *Client) doAPICall(ctx context.Context, url string, request interface{},
 
 	httpRequest, err := http.NewRequestWithContext(ctx, method, url, requestBody)
 	if err != nil {
-		return errs.Wrap(err)
+		return nil, errs.Wrap(err)
 	}
 	httpRequest.SetBasicAuth(g.user, g.token)
 	httpRequest.Header.Set("Content-Type", "application/json")
 
 	httpResponse, err := http.DefaultClient.Do(httpRequest)
 	if err != nil {
-		return errs.Wrap(err)
+		return nil, errs.Wrap(err)
 	}
 
 	body, err := io.ReadAll(httpResponse.Body)
 	if err != nil {
-		return errs.Wrap(err)
+		return nil, errs.Wrap(err)
 	}
 	defer func() { _ = httpResponse.Body.Close() }()
 
 	if httpResponse.StatusCode >= 300 {
-		return errs.New("couldn't get gerrit message from %s, code: %d, %s", url, httpResponse.StatusCode, body)
+		return nil, errs.New("couldn't get gerrit message from %s, code: %d, %s", url, httpResponse.StatusCode, body)
 	}
+	return body, nil
+}
 
+func (g *Client) doJsonAPICall(ctx context.Context, url string, request interface{}, result interface{}) error {
+	body, err := g.doAPICall(ctx, url, request)
+	if err != nil {
+		return errs.Wrap(err)
+	}
 	if result != nil {
 		// XSSI prevention chars are removed here
 		err = json.Unmarshal(body[5:], result)
@@ -84,13 +91,23 @@ func (g *Client) doAPICall(ctx context.Context, url string, request interface{},
 // GetCommit retrieves the commit of a gerrit patch.
 func (g *Client) GetCommit(ctx context.Context, changesetID string, commit string) (Commit, error) {
 	c := Commit{}
-	url := fmt.Sprintf("%s/changes/%s/revisions/%s/commit", gerritBaseURL, changesetID, commit)
-	err := g.doAPICall(ctx, url, nil, &c)
+	url := fmt.Sprintf("%s/a/changes/%s/revisions/%s/commit", gerritBaseURL, changesetID, commit)
+	err := g.doJsonAPICall(ctx, url, nil, &c)
 	if err != nil {
 		return Commit{}, err
 	}
 	return c, nil
+}
 
+// GetContent returns with a specific version of a file.
+func (g *Client) GetContent(ctx context.Context, project string, ref string, file string) (string, error) {
+	url := fmt.Sprintf("%s/a/projects/%s/branches/%s/files/%s/content", gerritBaseURL, url.QueryEscape(project), url.QueryEscape(ref), url.QueryEscape(file))
+	body, err := g.doAPICall(ctx, url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
 }
 
 // AddReview adds a new review (comment + vote) to a change.
@@ -100,22 +117,22 @@ func (g *Client) AddReview(ctx context.Context, changesetID string, revision str
 		Tag:     tag,
 	}
 	url := fmt.Sprintf("%s/a/changes/%s/revisions/%s/review", gerritBaseURL, changesetID, revision)
-	err := g.doAPICall(ctx, url, &i, nil)
+	err := g.doJsonAPICall(ctx, url, &i, nil)
 	return err
 }
 
 // QueryChanges search for changes based on search expression.
 func (g *Client) QueryChanges(ctx context.Context, condition string) (Changes, error) {
 	c := Changes{}
-	url := fmt.Sprintf("%s/changes/?q=%s", gerritBaseURL, url.QueryEscape(condition))
-	err := g.doAPICall(ctx, url, nil, &c)
+	url := fmt.Sprintf("%s/a/changes/?q=%s", gerritBaseURL, url.QueryEscape(condition))
+	err := g.doJsonAPICall(ctx, url, nil, &c)
 	return c, err
 }
 
 // GetChange returns with one change based on identifier.
 func (g *Client) GetChange(ctx context.Context, change string) (Change, error) {
 	c := Change{}
-	url := fmt.Sprintf("%s/changes/%s/?o=LABELS&o=CURRENT_REVISION&o=MESSAGES", gerritBaseURL, change)
-	err := g.doAPICall(ctx, url, nil, &c)
+	url := fmt.Sprintf("%s/a/changes/%s/?o=LABELS&o=CURRENT_REVISION&o=MESSAGES", gerritBaseURL, change)
+	err := g.doJsonAPICall(ctx, url, nil, &c)
 	return c, err
 }

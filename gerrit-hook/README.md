@@ -29,13 +29,35 @@ To install:
    github-token: <github personal access token>
 
    # Jenkins
-   jenkins-user: <some jenkins service user>
-   jenkins-token: <token generated for the specified user>
-
-   # Projects where this plugin is enabled.
-   projects:
-     - sandbox
+   jenkins:
+      name1:
+         url: https://...
+         user: ...
+         token: ...
    ```
+
+4. Configure project
+
+```
+git fetch gerrit refs/meta/config
+git checkout FETCH_HEAD
+```
+
+Edit `project.config`
+
+```
+...
+[storj-trigger]
+jenkins = name1
+verify = storj-gerrit-verify
+premerge = storj-gerrit-premerge
+```
+
+```
+git add project.config
+git commit -m "storj-trigger is configured"
+git push gerrit HEAD:refs/meta/config
+```
 
 In Storj environment it can be installed by `./deploy.sh`.
 
