@@ -3,10 +3,6 @@ run:
   issues-exit-code: 1
   tests: true
 
-  skip-files:
-    - ".*\\.pb\\.go$"
-    - ".*\\.dbx\\.go$"
-
 linters:
   enable:
     - bidichk                 # find dangerous bidi unicode symbols
@@ -29,7 +25,6 @@ linters:
     - nakedret                # check for naked returns
     - nilerr                  # checks for misuses of `if err != nil { return nil }`
     - noctx                   # finds locations that should use context
-    - nolintlint              # checks that nolint directives are correct
     - revive                  # check standard linting rules
     - tenv                    # ensure we use t.SetEnv instead of os.SetEnv
     - unconvert               # remove unnecessary conversions
@@ -44,6 +39,7 @@ linters:
     #TODO#- unparam           # check for unused parameters
     #TODO#- whitespace        # checks for leading/trailing newlines
   disable:
+    - nolintlint              # checks that nolint directives are correct
     - staticcheck      # we already use staticcheck separately
     - asciicheck       # non-ascii is allowed
     - containedctx     # gives false positives, however might be good to re-evaluate
@@ -97,7 +93,8 @@ linters:
   fast: false
 
 output:
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
 
@@ -173,6 +170,10 @@ issues:
   max-same-issues: 0
   new: false
   exclude-use-default: false
+
+  exclude-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.dbx\\.go$"
 
   exclude-rules:
     - linters:
