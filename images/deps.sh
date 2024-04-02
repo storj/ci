@@ -3,9 +3,9 @@ set -xeuo pipefail
 
 # CockroachDB
 
-wget -qO- https://binaries.cockroachdb.com/cockroach-v23.2.2.linux-amd64.tgz | tar xvz
-mv cockroach-v23.2.2.linux-amd64/cockroach /usr/local/bin/
-mv cockroach-v23.2.2.linux-amd64/lib/* /usr/lib/
+wget -qO- https://binaries.cockroachdb.com/cockroach-v23.2.3.linux-amd64.tgz | tar xvz
+mv cockroach-v23.2.3.linux-amd64/cockroach /usr/local/bin/
+mv cockroach-v23.2.3.linux-amd64/lib/* /usr/lib/
 
 # Postgres & Redis
 
