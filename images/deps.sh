@@ -26,7 +26,7 @@ echo 'fsync = off' >> /etc/postgresql/13/main/conf.d/nosync.conf
 # Google Cloud CLI for spanner emulator
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-apt-get update && apt-get install google-cloud-cli google-cloud-cli-spanner-emulator
+apt-get update && apt-get install -y -qq google-cloud-cli google-cloud-cli-spanner-emulator
 
 gcloud config configurations create emulator
 gcloud config set auth/disable_credentials true
