@@ -6,6 +6,7 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"go/types"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -34,40 +35,97 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	}
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
 		call := n.(*ast.CallExpr)
+
 		fn := typeutil.StaticCallee(pass.TypesInfo, call)
-		if fn == nil {
+		if fn != nil {
+			handleStaticCall(pass, call, fn)
 			return // not a static call
 		}
-
-		switch fn.FullName() {
-		case "github.com/zeebo/errs.Combine":
-			if len(call.Args) == 0 {
-				pass.Reportf(call.Lparen, "errs.Combine() can be simplified to nil")
-			}
-			if len(call.Args) == 1 && call.Ellipsis == token.NoPos {
-				pass.Reportf(call.Lparen, "errs.Combine(x) can be simplified to x")
-			}
-		case "(*github.com/zeebo/errs.Class).New":
-			if len(call.Args) == 0 {
-				return
-			}
-			// Disallow things like Error.New(err.Error())
-
-			switch arg := call.Args[0].(type) {
-			case *ast.BasicLit: // allow string constants
-			case *ast.Ident: // allow string variables
-			default:
-				// allow "alpha" + "beta" + "gamma"
-				if IsConcatString(arg) {
-					return
-				}
-
-				pass.Reportf(call.Lparen, "(*errs.Class).New with non-obvious format string")
-			}
+		if isErrsClassCast(pass, call) {
+			handleErrsClassCast(pass, call)
+			return
 		}
 	})
 
 	return nil, nil
+}
+
+func isErrsClassCast(pass *analysis.Pass, call *ast.CallExpr) bool {
+	sel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return false
+	}
+
+	{ // check that the package name matches
+		qualifier, ok := sel.X.(*ast.Ident)
+		if !ok {
+			return false
+		}
+
+		obj, ok := pass.TypesInfo.Uses[qualifier] // qualified identifier?
+		if !ok {
+			return false
+		}
+
+		pkgname, ok := obj.(*types.PkgName)
+		if !ok {
+			return false
+		}
+
+		if pkgname.Imported().Path() != "github.com/zeebo/errs" {
+			return false
+		}
+	}
+
+	return sel.Sel.Name == "Class"
+}
+
+func handleStaticCall(pass *analysis.Pass, call *ast.CallExpr, fn *types.Func) {
+	switch fn.FullName() {
+	case "github.com/zeebo/errs.Combine":
+		if len(call.Args) == 0 {
+			pass.Reportf(call.Lparen, "errs.Combine() can be simplified to nil")
+		}
+		if len(call.Args) == 1 && call.Ellipsis == token.NoPos {
+			pass.Reportf(call.Lparen, "errs.Combine(x) can be simplified to x")
+		}
+
+	case "(*github.com/zeebo/errs.Class).New", "github.com/zeebo/errs.New":
+		if len(call.Args) == 0 {
+			return
+		}
+		// Disallow things like Error.New(err.Error())
+
+		switch arg := call.Args[0].(type) {
+		case *ast.BasicLit: // allow string constants
+		case *ast.Ident: // allow string variables
+		default:
+			// allow "alpha" + "beta" + "gamma"
+			if IsConcatString(arg) {
+				return
+			}
+
+			pass.Reportf(call.Lparen, fn.FullName()+" with non-obvious format string")
+		}
+	}
+}
+
+func handleErrsClassCast(pass *analysis.Pass, call *ast.CallExpr) {
+	if len(call.Args) == 0 {
+		return
+	}
+
+	// Disallow things like errs.Class(fmt.Sprintf("xyz"))
+	switch arg := call.Args[0].(type) {
+	case *ast.BasicLit: // allow string constants
+	default:
+		// allow "alpha" + "beta" + "gamma"
+		if IsConcatString(arg) {
+			return
+		}
+
+		pass.Reportf(call.Lparen, "errs.Class(x), where x is not a constant")
+	}
 }
 
 // IsConcatString returns whether arg is a basic string expression.
