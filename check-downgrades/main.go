@@ -139,10 +139,10 @@ func check(olddir, newdir, modfile string, allowlist map[string]struct{}) (probl
 	var once sync.Once
 	emit := func(key, kind, path, oldVersion, newVersion string) {
 		once.Do(func() {
-			fmt.Fprintf(tw, "key\tkind\tmodule\told version\tnew version\n")
-			fmt.Fprintf(tw, "---\t----\t------\t-----------\t-----------\n")
+			_, _ = fmt.Fprintf(tw, "key\tkind\tmodule\told version\tnew version\n")
+			_, _ = fmt.Fprintf(tw, "---\t----\t------\t-----------\t-----------\n")
 		})
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", key, kind, path, oldVersion, newVersion)
+		_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", key, kind, path, oldVersion, newVersion)
 	}
 
 	// check for any unallowed downgrades

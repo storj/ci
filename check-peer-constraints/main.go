@@ -53,7 +53,7 @@ func main() {
 		Tests:      false,
 	}, "storj.io/storj/...")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to load pacakges: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "failed to load pacakges: %v\n", err)
 		os.Exit(1)
 	}
 	pkgs = flatten(pkgs)
@@ -66,7 +66,7 @@ func main() {
 		for _, peer := range include(Cmds, Peers) {
 			destination := match(pkgs, peer)
 			if links(source, destination) {
-				fmt.Fprintf(os.Stdout, "%q is importing %q\n", library, peer)
+				_, _ = fmt.Fprintf(os.Stdout, "%q is importing %q\n", library, peer)
 				exitcode = 1
 			}
 		}
@@ -78,7 +78,7 @@ func main() {
 		for _, cmd := range Cmds {
 			destination := match(pkgs, cmd)
 			if links(source, destination) {
-				fmt.Fprintf(os.Stdout, "%q is importing %q\n", peer, cmd)
+				_, _ = fmt.Fprintf(os.Stdout, "%q is importing %q\n", peer, cmd)
 				exitcode = 1
 			}
 		}
@@ -95,7 +95,7 @@ func main() {
 
 			destination := match(pkgs, peerB)
 			if links(source, destination) {
-				fmt.Fprintf(os.Stdout, "%q is importing %q\n", peerA, peerB)
+				_, _ = fmt.Fprintf(os.Stdout, "%q is importing %q\n", peerA, peerB)
 				exitcode = 1
 			}
 		}

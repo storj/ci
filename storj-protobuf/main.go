@@ -218,7 +218,7 @@ func checklock(dir string, dirs []string, files []string) error {
 	if !bytes.Equal(original, changed) {
 		diff, err := diff(original, changed)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
+			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 		}
 		return fmt.Errorf("protolock is not up to date: %v", string(diff))
 	}
@@ -285,7 +285,7 @@ func listProtoFiles(root string) ([]string, error) {
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			_, _ = fmt.Fprintln(os.Stderr, err)
 			return nil
 		}
 		if info.IsDir() && ignoreDir[info.Name()] {

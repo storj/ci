@@ -26,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	if *xunit == "" {
-		fmt.Fprintf(os.Stderr, "xunit file not specified\n")
+		_, _ = fmt.Fprintf(os.Stderr, "xunit file not specified\n")
 		os.Exit(1)
 	}
 
@@ -37,9 +37,9 @@ func main() {
 	errcode := pkgs.ExitCode()
 	if err != nil {
 		if errors.Is(err, parse.ErrNotParseable) {
-			fmt.Fprintf(os.Stderr, "tparse error: no parseable events: call go test with -json flag\n\n")
+			_, _ = fmt.Fprintf(os.Stderr, "tparse error: no parseable events: call go test with -json flag\n\n")
 		} else {
-			fmt.Fprintf(os.Stderr, "tparse error: %v\n\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "tparse error: %v\n\n", err)
 		}
 		errcode = 1
 	}
@@ -47,12 +47,12 @@ func main() {
 
 	output, err := os.Create(*xunit)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "create error: %v\n\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "create error: %v\n\n", err)
 		return
 	}
 	defer func() {
 		if err := output.Close(); err != nil {
-			fmt.Fprintf(os.Stderr, "close error: %v\n\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "close error: %v\n\n", err)
 		}
 	}()
 
@@ -154,14 +154,14 @@ type printingEncoder struct {
 func (encoder *printingEncoder) EncodeToken(token xml.Token) {
 	err := encoder.Encoder.EncodeToken(token)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "encoder: failed encoding %v: %v\n", token, err)
+		_, _ = fmt.Fprintf(os.Stderr, "encoder: failed encoding %v: %v\n", token, err)
 	}
 }
 
 func (encoder *printingEncoder) Flush() {
 	err := encoder.Encoder.Flush()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "encoder: failed to flush: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "encoder: failed to flush: %v\n", err)
 	}
 }
 
@@ -213,7 +213,7 @@ func ProcessWithEcho(r io.Reader) (parse.Packages, error) {
 		scan = true
 
 		if line := strings.TrimRightFunc(event.Output, unicode.IsSpace); line != "" {
-			fmt.Fprintln(os.Stdout, line)
+			_, _ = fmt.Fprintln(os.Stdout, line)
 		}
 
 		pkg, ok := pkgs[event.Package]

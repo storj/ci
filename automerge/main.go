@@ -52,9 +52,9 @@ func run(ctx context.Context, cl *Client) error {
 	tw := tabwriter.NewWriter(os.Stdout, 4, 4, 4, ' ', 0)
 	defer func() { _ = tw.Flush() }()
 
-	fmt.Fprintln(tw, "change\tnumber\tmergable\tsubmittable\thas_no_parents\thas_verified\tverified\tlatest_build\tnot_building\tcan_rebase\trev")
+	_, _ = fmt.Fprintln(tw, "change\tnumber\tmergable\tsubmittable\thas_no_parents\thas_verified\tverified\tlatest_build\tnot_building\tcan_rebase\trev")
 	for _, ci := range cis {
-		fmt.Fprintf(tw, "%s\t%d\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\n",
+		_, _ = fmt.Fprintf(tw, "%s\t%d\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\n",
 			ci.ViewURL(cl.base),
 			ci.Number,
 			ci.Mergeable,

@@ -105,7 +105,7 @@ func handleStaticCall(pass *analysis.Pass, call *ast.CallExpr, fn *types.Func) {
 				return
 			}
 
-			pass.Reportf(call.Lparen, fn.FullName()+" with non-obvious format string")
+			pass.Reportf(call.Lparen, "%v with non-obvious format string", fn.FullName())
 		}
 	}
 }

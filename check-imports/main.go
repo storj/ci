@@ -149,7 +149,7 @@ func verifyPackage(stderr io.Writer, pkg *packages.Package) (misgrouped, unsorte
 
 		if !ordered || !sorted {
 			if isGenerated(path) {
-				fmt.Fprintln(stderr, "(ignoring generated)", path)
+				_, _ = fmt.Fprintln(stderr, "(ignoring generated)", path)
 				continue
 			}
 		}
