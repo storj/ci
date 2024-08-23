@@ -26,7 +26,7 @@ type Client struct {
 func (c *Client) GetChangeInfos(ctx context.Context) (cis []*ChangeInfo, err error) {
 	q := strings.Join([]string{
 		"status:open",
-		"label:Code-Review=2,count>=2",
+		"is:submittable",
 		"-label:Code-Review<=-1",
 		"-has:unresolved",
 		"-is:wip",
