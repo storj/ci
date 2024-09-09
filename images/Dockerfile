@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     go install github.com/nilslice/protolock/cmd/protolock@v0.17.0 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
     go install honnef.co/go/tools/cmd/staticcheck@2024.1.1 && \
-    go install github.com/mfridman/tparse@v0.13.2   && \
+    go install github.com/mfridman/tparse@v0.15.0   && \
     go install github.com/axw/gocov/gocov@v1.1.0    && \
     go install github.com/AlekSi/gocov-xml@v1.1.0   && \
     go install github.com/google/go-licenses@v1.6.0 && \
