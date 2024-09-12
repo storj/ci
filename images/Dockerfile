@@ -13,7 +13,7 @@ FROM golang:1.22.5 AS linters
 ENV PATH=$PATH:/go/bin
 RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3 && \
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 && \
     go install github.com/ckaznocha/protoc-gen-lint@920e717f46849cad73a643be1c8f044cb4782101 && \
     go install github.com/nilslice/protolock/cmd/protolock@v0.17.0 && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786 && \
