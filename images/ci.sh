@@ -16,3 +16,4 @@ apt -y install /tmp/duplicati.deb
 
 # Requirements for UI tests
 npx playwright install-deps
+npx playwright install
