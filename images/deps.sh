@@ -34,10 +34,10 @@ gcloud config set project storj-build
 gcloud config set api_endpoint_overrides/spanner http://localhost:9020/
 
 # Google Cloud CLI for spanner emulator binaries
-SPANNER_VERSION=1.5.23
+SPANNER_VERSION=1.5.24
 SPANNER_ARCH=amd64
 wget -O cloud-spanner-emulator.tar.gz https://storage.googleapis.com/cloud-spanner-emulator/releases/${SPANNER_VERSION}/cloud-spanner-emulator_linux_${SPANNER_ARCH}-${SPANNER_VERSION}.tar.gz
-echo "4a3c8c6a124a68522b24bca2e6e2152eb4b4eb7383565d3c35310b2012044e26 *cloud-spanner-emulator.tar.gz" | sha256sum --check
+echo "d3e3281fdc590c72238d0681cce5cd40e60d2d980406f0e0ed98887a41cb28f6 *cloud-spanner-emulator.tar.gz" | sha256sum --check
 tar xvf cloud-spanner-emulator.tar.gz
 chmod u+x gateway_main emulator_main
 mv gateway_main /usr/local/bin/spanner_gateway
