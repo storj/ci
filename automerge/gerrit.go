@@ -20,13 +20,14 @@ type Client struct {
 	base string
 	user string
 	pass string
+	dry  bool
 }
 
 // GetChangeInfos returns changes that can be potentially be automatically submitted.
 func (c *Client) GetChangeInfos(ctx context.Context) (cis []*ChangeInfo, err error) {
 	q := strings.Join([]string{
 		"status:open",
-		"is:submittable",
+		"(is:submittable", "or", "label:Code-Review=MAX,count>=2)",
 		"-label:Code-Review<=-1",
 		"-has:unresolved",
 		"-is:wip",
@@ -71,6 +72,9 @@ func (c *Client) Submit(ctx context.Context, ci *ChangeInfo) error {
 }
 
 func (c *Client) query(ctx context.Context, method, endpoint string, into interface{}) error {
+	if c.dry && method == "POST" {
+		return nil
+	}
 	req, err := http.NewRequestWithContext(ctx, method, c.base+"a/"+endpoint, nil)
 	if err != nil {
 		return errs.Wrap(err)
