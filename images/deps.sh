@@ -23,17 +23,7 @@ echo 'host    all             all             ::0/0                   trust' >> 
 echo 'max_connections = 1000' >> /etc/postgresql/13/main/conf.d/connectionlimits.conf
 echo 'fsync = off' >> /etc/postgresql/13/main/conf.d/nosync.conf
 
-# Google Cloud CLI for spanner emulator
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-apt-get update && apt-get install -y -qq google-cloud-cli google-cloud-cli-spanner-emulator
-
-gcloud config configurations create emulator
-gcloud config set auth/disable_credentials true
-gcloud config set project storj-build
-gcloud config set api_endpoint_overrides/spanner http://localhost:9020/
-
-# Google Cloud CLI for spanner emulator binaries
+# Google Cloud Spanner Emulator binaries
 SPANNER_VERSION=1.5.24
 SPANNER_ARCH=amd64
 wget -O cloud-spanner-emulator.tar.gz https://storage.googleapis.com/cloud-spanner-emulator/releases/${SPANNER_VERSION}/cloud-spanner-emulator_linux_${SPANNER_ARCH}-${SPANNER_VERSION}.tar.gz
