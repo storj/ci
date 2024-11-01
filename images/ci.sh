@@ -15,5 +15,5 @@ curl -sfL https://updates.duplicati.com/beta/duplicati_2.0.7.1-1_all.deb -o /tmp
 apt -y install /tmp/duplicati.deb
 
 # Requirements for UI tests
-npx playwright install-deps
-npx playwright install
+npm install @playwright/test@v1.48.2
+npx playwright install --with-deps
