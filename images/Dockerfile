@@ -65,7 +65,7 @@ COPY scripts scripts
 COPY images/ci.sh images/ci.sh
 # rclone and test tool for S3 gateway test scenarios
 
-ENV PATH="$PATH:/root/bin"
+ENV PATH="$PATH:/root/bin:/usr/local/zig"
 RUN bash images/ci.sh
 
 # tools

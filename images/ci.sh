@@ -17,3 +17,10 @@ apt -y install /tmp/duplicati.deb
 # Requirements for UI tests
 npm install @playwright/test@v1.48.2
 npx playwright install --with-deps
+
+# Install Zig for cross-compiling
+VERSION=0.13.0
+wget https://ziglang.org/download/$VERSION/zig-linux-x86_64-$VERSION.tar.xz
+tar -xJf zig-linux-x86_64-$VERSION.tar.xz
+rm zig-linux-x86_64-$VERSION.tar.xz
+mv zig-linux-x86_64-$VERSION /usr/local/zig
