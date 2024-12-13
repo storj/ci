@@ -52,7 +52,7 @@ RUN go install golang.org/dl/go1.20.14@latest && \
     go.min download && \
     rm /root/sdk/go1.20.14/*.tar.gz
 
-FROM ci-slim as ci
+FROM ci-slim AS ci
 
 # ci:deps
 
