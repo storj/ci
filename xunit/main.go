@@ -4,9 +4,7 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
-	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"flag"
@@ -15,7 +13,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/mfridman/tparse/parse"
 )
@@ -33,10 +30,10 @@ func main() {
 	var buffer bytes.Buffer
 	stdin := io.TeeReader(os.Stdin, &buffer)
 
-	pkgs, err := ProcessWithEcho(stdin)
+	pkgs, err := parse.Process(stdin, parse.WithFollowOutput(true))
 	errcode := pkgs.ExitCode()
 	if err != nil {
-		if errors.Is(err, parse.ErrNotParseable) {
+		if errors.Is(err, parse.ErrNotParsable) {
 			_, _ = fmt.Fprintf(os.Stderr, "tparse error: no parseable events: call go test with -json flag\n\n")
 		} else {
 			_, _ = fmt.Fprintf(os.Stderr, "tparse error: %v\n\n", err)
@@ -65,7 +62,7 @@ func main() {
 	encoder.EncodeToken(xml.StartElement{Name: xml.Name{Local: "testsuites"}, Attr: nil})
 	defer encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "testsuites"}})
 
-	for _, pkg := range pkgs {
+	for _, pkg := range pkgs.Packages {
 		failed := TestsByAction(pkg, parse.ActionFail)
 		skipped := TestsByAction(pkg, parse.ActionSkip)
 		passed := TestsByAction(pkg, parse.ActionPass)
@@ -132,19 +129,38 @@ func main() {
 						encoder.EncodeToken(xml.StartElement{
 							Name: xml.Name{Local: "skipped"},
 							Attr: []xml.Attr{
-								{Name: xml.Name{Local: "message"}, Value: t.Stack()},
+								{Name: xml.Name{Local: "message"}, Value: testStack(t)},
 							},
 						})
 						encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "skipped"}})
 					case parse.ActionFail:
 						encoder.EncodeToken(xml.StartElement{Name: xml.Name{Local: "failure"}, Attr: nil})
-						encoder.EncodeToken(xml.CharData(t.Stack()))
+						encoder.EncodeToken(xml.CharData(testStack(t)))
 						encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "failure"}})
 					}
 				}()
 			}
 		}()
 	}
+}
+
+func testStack(t *parse.Test) string {
+	t.SortEvents()
+	for i, ev := range t.Events {
+		beginningOfStack := strings.Contains(ev.Output, "--- PASS:") ||
+			strings.Contains(ev.Output, "--- FAIL:") ||
+			strings.Contains(ev.Output, "--- SKIP:")
+		if !beginningOfStack {
+			continue
+		}
+
+		var stack strings.Builder
+		for _, ev := range t.Events[i:] {
+			stack.WriteString(ev.Output)
+		}
+		return stack.String()
+	}
+	return ""
 }
 
 type printingEncoder struct {
@@ -165,7 +181,7 @@ func (encoder *printingEncoder) Flush() {
 	}
 }
 
-func eventOutput(events parse.Events) string {
+func eventOutput(events []*parse.Event) string {
 	var out strings.Builder
 	for _, event := range events {
 		out.WriteString(event.Output)
@@ -182,137 +198,6 @@ func withoutEmptyName(tests []*parse.Test) []*parse.Test {
 	}
 	return out
 }
-
-// Code based on: https://github.com/mfridman/tparse/blob/master/parse/process.go#L27
-
-// ProcessWithEcho processes go test -json output and echos the usual output to stdout.
-func ProcessWithEcho(r io.Reader) (parse.Packages, error) {
-	pkgs := parse.Packages{}
-
-	var hasRace bool
-
-	var scan bool
-	var badLines int
-
-	scanner := bufio.NewScanner(r)
-	for scanner.Scan() {
-		// Scan up-to 50 lines for a parseable event, if we get one, expect
-		// no errors to follow until EOF.
-		event, err := parse.NewEvent(scanner.Bytes())
-		if err != nil {
-			badLines++
-			if scan || badLines > 50 {
-				var jserr *json.SyntaxError
-				if errors.As(err, &jserr) {
-					return nil, parse.ErrNotParseable
-				}
-				return nil, err
-			}
-			continue
-		}
-		scan = true
-
-		if line := strings.TrimRightFunc(event.Output, unicode.IsSpace); line != "" {
-			_, _ = fmt.Fprintln(os.Stdout, line)
-		}
-
-		pkg, ok := pkgs[event.Package]
-		if !ok {
-			pkg = parse.NewPackage()
-			pkgs[event.Package] = pkg
-		}
-
-		if event.IsPanic() {
-			pkg.HasPanic = true
-			pkg.Summary.Action = parse.ActionFail
-			pkg.Summary.Package = event.Package
-			pkg.Summary.Test = event.Test
-		}
-		// Short circuit output when panic is detected.
-		if pkg.HasPanic {
-			pkg.PanicEvents = append(pkg.PanicEvents, event)
-			continue
-		}
-
-		if event.IsRace() {
-			hasRace = true
-		}
-
-		if event.IsCached() {
-			pkg.Cached = true
-		}
-
-		if event.NoTestFiles() {
-			pkg.NoTestFiles = true
-			// Manually mark [no test files] as "pass", because the go test tool reports the
-			// package Summary action as "skip".
-			pkg.Summary.Package = event.Package
-			pkg.Summary.Action = parse.ActionPass
-		}
-		if event.NoTestsWarn() {
-			// One or more tests within the package contains no tests.
-			pkg.NoTestSlice = append(pkg.NoTestSlice, event)
-		}
-
-		if event.NoTestsToRun() {
-			// Only pkgs marked as "pass" will contain a summary line appended with [no tests to run].
-			// This indicates one or more tests is marked as having no tests to run.
-			pkg.NoTests = true
-			pkg.Summary.Package = event.Package
-			pkg.Summary.Action = parse.ActionPass
-		}
-
-		if event.LastLine() {
-			pkg.Summary = event
-			continue
-		}
-
-		cover, ok := event.Cover()
-		if ok {
-			pkg.Cover = true
-			pkg.Coverage = cover
-		}
-
-		// special case for tooling checking
-		if event.Action == parse.ActionOutput && strings.HasPrefix(event.Output, "FAIL\t") {
-			event.Action = parse.ActionFail
-		}
-
-		if !Discard(event) {
-			pkg.AddEvent(event)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("bufio scanner error: %w", err)
-	}
-	if !scan {
-		return nil, parse.ErrNotParseable
-	}
-	if hasRace {
-		return pkgs, parse.ErrRaceDetected
-	}
-
-	return pkgs, nil
-}
-
-// Discard checks whether the event should be ignored.
-func Discard(e *parse.Event) bool {
-	for i := range updates {
-		if strings.HasPrefix(e.Output, updates[i]) {
-			return true
-		}
-	}
-	return false
-}
-
-var (
-	updates = []string{
-		"=== RUN   ",
-		"=== PAUSE ",
-		"=== CONT  ",
-	}
-)
 
 // TestStatus reports the outcome of the test represented as a single Action: pass, fail or skip.
 //
