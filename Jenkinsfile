@@ -6,7 +6,10 @@ node('node') {
 
     stage('Checkout') {
       lastStage = env.STAGE_NAME
-      checkout scm
+
+      timeout(time: 10 unit: 'MINUTES') {
+        checkout scm
+      }
 
       echo "Current build result: ${currentBuild.result}"
     }
@@ -14,7 +17,9 @@ node('node') {
     stage('Build and push images') {
       lastStage = env.STAGE_NAME
 
-      sh 'make build-and-push-images'
+      timeout(time: 1 unit: 'HOURS') {
+        sh 'make build-and-push-images'
+      }
 
       echo "Current build result: ${currentBuild.result}"
     }
