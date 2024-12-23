@@ -7,7 +7,7 @@ node('node') {
     stage('Checkout') {
       lastStage = env.STAGE_NAME
 
-      timeout(time: 10 unit: 'MINUTES') {
+      timeout(time: 10, unit: 'MINUTES') {
         checkout scm
       }
 
@@ -17,7 +17,7 @@ node('node') {
     stage('Build and push images') {
       lastStage = env.STAGE_NAME
 
-      timeout(time: 1 unit: 'HOURS') {
+      timeout(time: 1, unit: 'HOURS') {
         sh 'make build-and-push-images'
       }
 
