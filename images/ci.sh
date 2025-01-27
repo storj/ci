@@ -1,9 +1,7 @@
 set -xeuo pipefail
 
-bash ./scripts/install-awscli.sh
-
 ## Tools for gateway testing
-apt-get install -y s3fs
+apt-get install -y s3fs awscli
 # Duplicity backup tool for S3 gateway test scenarios
 apt-get install -y duplicity python3-pip python3-boto3
 # Tool for running github.com/ceph/s3-tests for gateway
