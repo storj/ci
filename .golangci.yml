@@ -11,7 +11,6 @@ linters:
     - durationcheck           # verifies whether durations are multiplied, usually a mistake
     - errcheck                # find unchecked errors
     - errorlint               # finds misuses of errors
-    - exportloopref           # check for exported loop vars
     - gocritic                # checks for style, performance issues, and common programming errors
     - godot                   # dots for everything
     - err113                  # check error expressions
@@ -26,7 +25,7 @@ linters:
     - nilerr                  # checks for misuses of `if err != nil { return nil }`
     - noctx                   # finds locations that should use context
     - revive                  # check standard linting rules
-    - tenv                    # ensure we use t.SetEnv instead of os.SetEnv
+    - usetesting              # ensure we use t.SetEnv instead of os.SetEnv
     - unconvert               # remove unnecessary conversions
     - wastedassign
     #TODO#- nilnil            # needs fixes; checks that we don't return a nil and no-error
@@ -60,7 +59,6 @@ linters:
     - godox            # too many false positivies
     - goheader         # separate tool
     - goimports        # disabled, because it's slow, using scripts/check-imports.go instead.
-    - gomnd            # false positives
     - gomoddirectives  # not useful
     - gomodguard       # not useful
     - gosec            # needs tweaking
