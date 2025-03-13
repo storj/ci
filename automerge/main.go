@@ -17,7 +17,7 @@ import (
 
 func main() {
 	var (
-		base = flag.String("base", "https://review.dev.storj.io/", "gerrit base url")
+		base = flag.String("base", "https://review.dev.storj.tools/", "gerrit base url")
 		user = flag.String("user", os.Getenv("AUTOMERGE_USER"), "username for the performed actions")
 		pass = flag.String("pass", os.Getenv("AUTOMERGE_PASS"), "password for the user performing actions")
 		dry  = flag.Bool("dry", false, "dry run")

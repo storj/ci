@@ -1,11 +1,11 @@
 def repositories = [
-    'https://review.dev.storj.io/storj/common',
-    'https://review.dev.storj.io/storj/uplink',
-    'https://review.dev.storj.io/storj/uplink-c',
-    'https://review.dev.storj.io/storj/gateway',
-    'https://review.dev.storj.io/storj/edge',
-    'https://review.dev.storj.io/storj/storj',
-    'https://review.dev.storj.io/storj/drpc'
+    'https://review.dev.storj.tools/storj/common',
+    'https://review.dev.storj.tools/storj/uplink',
+    'https://review.dev.storj.tools/storj/uplink-c',
+    'https://review.dev.storj.tools/storj/gateway',
+    'https://review.dev.storj.tools/storj/edge',
+    'https://review.dev.storj.tools/storj/storj',
+    'https://review.dev.storj.tools/storj/drpc'
 ]
 
 def repositoryCheckStages = repositories.collectEntries {

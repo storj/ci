@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var gerritBaseURL = "https://review.dev.storj.io"
+var gerritBaseURL = "https://review.dev.storj.tools"
 
 // Client is a Gerrit Rest client.
 type Client struct {

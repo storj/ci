@@ -4,7 +4,7 @@ sandbox~main~Iec94f295143f973a7e54bc5c8cf187dbc3eb2b64
 --kind
 NO_CODE_CHANGE
 --change-url
-https://review.dev.storj.io/c/sandbox/+/7819
+https://review.dev.storj.tools/c/sandbox/+/7819
 --change-owner
 "Elek, Márton <marton@storj.io>"
 --change-owner-username

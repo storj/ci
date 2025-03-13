@@ -4,7 +4,7 @@ sandbox~refs%2Fmeta%2Fconfig~I77c4511e76c90105fd7db1c793dfdbb6e3a1c765
 --kind
 REWORK
 --change-url
-https://review.dev.storj.io/c/sandbox/+/7762
+https://review.dev.storj.tools/c/sandbox/+/7762
 --change-owner
 "Elek, Márton <marton@storj.io>"
 --change-owner-username

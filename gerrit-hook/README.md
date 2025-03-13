@@ -64,7 +64,7 @@ In Storj environment it can be installed by `./deploy.sh`.
 Example of parameters used by gerrit:
 
 ```
---change storj%2Fup~main~I684af6cd8a0c49baa7b55c2298fbd1974f5c56fe --kind REWORK --change-url https://review.dev.storj.io/c/storj/up/+/6241 --change-owner "Elek, Márton <marton@storj.io>" --change-owner-username elek --project storj/up --branch main --topic  --uploader "Elek, Márton <marton@storj.io>" --uploader-username elek --commit c72759e5db315f1cdbe9c8529cecc003f2c38f3e --patchset 3gerrit@gerrit
+--change storj%2Fup~main~I684af6cd8a0c49baa7b55c2298fbd1974f5c56fe --kind REWORK --change-url https://review.dev.storj.tools/c/storj/up/+/6241 --change-owner "Elek, Márton <marton@storj.io>" --change-owner-username elek --project storj/up --branch main --topic  --uploader "Elek, Márton <marton@storj.io>" --uploader-username elek --commit c72759e5db315f1cdbe9c8529cecc003f2c38f3e --patchset 3gerrit@gerrit
 ```
 
 The current implementation:
