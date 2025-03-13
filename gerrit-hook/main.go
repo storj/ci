@@ -68,11 +68,16 @@ func main() {
 	}
 	g := github.NewClient(log.Named("github"), client)
 
+	gerritBaseURL := viper.GetString("gerrit-baseurl")
+	if gerritBaseURL == "" {
+		gerritBaseURL = "https://review.dev.storj.tools"
+	}
+
 	gerritUser := viper.GetString("gerrit-user")
 	if gerritUser == "" {
 		gerritUser = "gerrit-trigger"
 	}
-	gr := gerrit.NewClient(log.Named("gerrit"), gerritUser, viper.GetString("gerrit-token"))
+	gr := gerrit.NewClient(log.Named("gerrit"), gerritBaseURL, gerritUser, viper.GetString("gerrit-token"))
 
 	// arguments are defined by gerrit hook system, usually (but not only) --key value about the build
 	argMap := map[string]string{}

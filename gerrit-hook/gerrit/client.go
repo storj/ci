@@ -16,21 +16,21 @@ import (
 	"go.uber.org/zap"
 )
 
-var gerritBaseURL = "https://review.dev.storj.tools"
-
 // Client is a Gerrit Rest client.
 type Client struct {
-	user  string
-	token string
-	log   *zap.Logger
+	baseurl string
+	user    string
+	token   string
+	log     *zap.Logger
 }
 
 // NewClient creates a new Gerrit REST client.
-func NewClient(log *zap.Logger, user, token string) Client {
+func NewClient(log *zap.Logger, baseurl, user, token string) Client {
 	return Client{
-		user:  user,
-		token: token,
-		log:   log,
+		baseurl: baseurl,
+		user:    user,
+		token:   token,
+		log:     log,
 	}
 }
 
@@ -91,7 +91,7 @@ func (g *Client) doJsonAPICall(ctx context.Context, url string, request interfac
 // GetCommit retrieves the commit of a gerrit patch.
 func (g *Client) GetCommit(ctx context.Context, changesetID string, commit string) (Commit, error) {
 	c := Commit{}
-	url := fmt.Sprintf("%s/a/changes/%s/revisions/%s/commit", gerritBaseURL, changesetID, commit)
+	url := fmt.Sprintf("%s/a/changes/%s/revisions/%s/commit", g.baseurl, changesetID, commit)
 	err := g.doJsonAPICall(ctx, url, nil, &c)
 	if err != nil {
 		return Commit{}, err
@@ -101,7 +101,7 @@ func (g *Client) GetCommit(ctx context.Context, changesetID string, commit strin
 
 // GetContent returns with a specific version of a file.
 func (g *Client) GetContent(ctx context.Context, project string, ref string, file string) (string, error) {
-	url := fmt.Sprintf("%s/a/projects/%s/branches/%s/files/%s/content", gerritBaseURL, url.QueryEscape(project), url.QueryEscape(ref), url.QueryEscape(file))
+	url := fmt.Sprintf("%s/a/projects/%s/branches/%s/files/%s/content", g.baseurl, url.QueryEscape(project), url.QueryEscape(ref), url.QueryEscape(file))
 	body, err := g.doAPICall(ctx, url, nil)
 	if err != nil {
 		return "", err
@@ -116,7 +116,7 @@ func (g *Client) AddReview(ctx context.Context, changesetID string, revision str
 		Message: comment,
 		Tag:     tag,
 	}
-	url := fmt.Sprintf("%s/a/changes/%s/revisions/%s/review", gerritBaseURL, changesetID, revision)
+	url := fmt.Sprintf("%s/a/changes/%s/revisions/%s/review", g.baseurl, changesetID, revision)
 	err := g.doJsonAPICall(ctx, url, &i, nil)
 	return err
 }
@@ -124,7 +124,7 @@ func (g *Client) AddReview(ctx context.Context, changesetID string, revision str
 // QueryChanges search for changes based on search expression.
 func (g *Client) QueryChanges(ctx context.Context, condition string) (Changes, error) {
 	c := Changes{}
-	url := fmt.Sprintf("%s/a/changes/?q=%s", gerritBaseURL, url.QueryEscape(condition))
+	url := fmt.Sprintf("%s/a/changes/?q=%s", g.baseurl, url.QueryEscape(condition))
 	err := g.doJsonAPICall(ctx, url, nil, &c)
 	return c, err
 }
@@ -132,7 +132,7 @@ func (g *Client) QueryChanges(ctx context.Context, condition string) (Changes, e
 // GetChange returns with one change based on identifier.
 func (g *Client) GetChange(ctx context.Context, change string) (Change, error) {
 	c := Change{}
-	url := fmt.Sprintf("%s/a/changes/%s/?o=LABELS&o=CURRENT_REVISION&o=MESSAGES", gerritBaseURL, change)
+	url := fmt.Sprintf("%s/a/changes/%s/?o=LABELS&o=CURRENT_REVISION&o=MESSAGES", g.baseurl, change)
 	err := g.doJsonAPICall(ctx, url, nil, &c)
 	return c, err
 }

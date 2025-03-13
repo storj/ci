@@ -17,6 +17,7 @@ To install:
 
    ```
    # Gerrit
+   gerrit-baseurl: https://review.dev.storj.tools
    gerrit-user: <some gerrit service user>
    gerrit-token: <token generated for the specified user>
 

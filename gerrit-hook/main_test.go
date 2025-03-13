@@ -39,7 +39,7 @@ jenkins:
 func TestReadTriggerConfig(t *testing.T) {
 	t.Skip("Real integration test. Requires Gerrit user")
 	log := zaptest.NewLogger(t)
-	gr := gerrit.NewClient(log, os.Getenv("GERRIT_USER"), os.Getenv("GERRIT_TOKEN"))
+	gr := gerrit.NewClient(log, os.Getenv("GERRIT_BASEURL"), os.Getenv("GERRIT_USER"), os.Getenv("GERRIT_TOKEN"))
 	config := ReadTriggerConfig(context.Background(), log, gr, "storj/storj")
 	fmt.Println(config)
 	require.Equal(t, "storj-gerrit-verify", config.Verify)

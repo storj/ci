@@ -12,7 +12,9 @@ import (
 )
 
 func Test_getCommitMessage(t *testing.T) {
-	g := Client{}
+	g := Client{
+		baseurl: "https://review.dev.storj.tools",
+	}
 	commit, err := g.GetCommit(context.Background(), "storj%2Fvelero-plugin~master~I6d20b5a8605a99740834df326ad26e646eae206e", "9288388465675dd98e30f30e2575c25d3e9f8880")
 	assert.NoError(t, err)
 	assert.Contains(t, commit.Subject, "WIP: integration test")
@@ -22,7 +24,8 @@ func Test_getCommitMessage(t *testing.T) {
 func Test_addReview(t *testing.T) {
 	e := os.Getenv("GERRIT_HOOK_TOKEN")
 	g := Client{
-		token: e,
+		baseurl: "https://review.dev.storj.tools",
+		token:   e,
 	}
 	err := g.AddReview(context.Background(), "Ic7a5aeb29a0972d43df018fdbac44256ab74e763", "1", "test comment", "")
 	assert.NoError(t, err)
