@@ -18,13 +18,13 @@ import (
 
 func TestJenkinsInstancesConfig(t *testing.T) {
 	viper.Reset()
-	configBytes := bytes.NewBuffer([]byte(`
+	configBytes := bytes.NewBufferString(`
 jenkins:
    public:
       url: test
    private:
       url: test2
-`))
+`)
 	viper.SetConfigType("yaml")
 	err := viper.ReadConfig(configBytes)
 	instances := jenkinsInstances()

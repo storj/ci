@@ -53,7 +53,7 @@ func main() {
 		}
 	}()
 
-	_, _ = output.Write([]byte(xml.Header))
+	_, _ = output.WriteString(xml.Header)
 
 	encoder := &printingEncoder{xml.NewEncoder(output)}
 	encoder.Indent("", "\t")

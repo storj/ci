@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Storj Labs, Inc.
 // See LICENSE for copying information.
 
-// check-cross-compile checks whether whether the program can be easily cross-compiled.
+// check-cross-compile checks whether the program can be easily cross-compiled.
 package main
 
 import (

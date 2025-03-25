@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -278,12 +279,12 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 			"-o", resourcesyso,
 			"-original-name", binaryName,
 			"-description", name+" program for Storj",
-			"-product-ver-major", fmt.Sprintf("%d", env.Commit.Version.Major),
-			"-ver-major", fmt.Sprintf("%d", env.Commit.Version.Major),
-			"-product-ver-minor", fmt.Sprintf("%d", env.Commit.Version.Minor),
-			"-ver-minor", fmt.Sprintf("%d", env.Commit.Version.Minor),
-			"-product-ver-patch", fmt.Sprintf("%d", env.Commit.Version.Patch),
-			"-ver-patch", fmt.Sprintf("%d", env.Commit.Version.Patch),
+			"-product-ver-major", strconv.FormatUint(env.Commit.Version.Major, 10),
+			"-ver-major", strconv.FormatUint(env.Commit.Version.Major, 10),
+			"-product-ver-minor", strconv.FormatUint(env.Commit.Version.Minor, 10),
+			"-ver-minor", strconv.FormatUint(env.Commit.Version.Minor, 10),
+			"-product-ver-patch", strconv.FormatUint(env.Commit.Version.Patch, 10),
+			"-ver-patch", strconv.FormatUint(env.Commit.Version.Patch, 10),
 			"-product-version", version,
 			"-special-build", version,
 			"-icon", iconfile,
