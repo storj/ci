@@ -1,5 +1,5 @@
 # tools image that we can cache
-FROM golang:1.24.1 AS tools
+FROM golang:1.24.2 AS tools
 
 WORKDIR /go/ci
 
@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     go install ./...
 
-FROM golang:1.24.1 AS linters
+FROM golang:1.24.2 AS linters
 # Linters, formatters, build tools
 ENV PATH=$PATH:/go/bin
 RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
@@ -24,13 +24,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     go install github.com/google/go-licenses@v1.6.0 && \
     go install github.com/magefile/mage@v1.15.0
 
-FROM golang:1.24.1 AS rclone
+FROM golang:1.24.2 AS rclone
 RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     go install github.com/rclone/rclone@v1.65.0 && \
     go install github.com/rclone/rclone/fstest/test_all@v1.65.0
 
-FROM golang:1.24.1 AS ci-slim
+FROM golang:1.24.2 AS ci-slim
 
 WORKDIR /go/ci
 
