@@ -2,9 +2,11 @@ REGISTRY_HOST ?= storjlabs
 
 .PHONY: build-slim
 build-slim:
-	docker build \
+	docker buildx build \
+	    --load \
 		--tag $(REGISTRY_HOST)/ci:slim \
-		-f images/ci-slim/Dockerfile .
+		--platform linux/amd64 \
+		-f images/Dockerfile .
 
 .PHONY: build-and-push-images
 build-and-push-images:
