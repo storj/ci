@@ -1,0 +1,8 @@
+github.com/storj/ci/check-mod-tidy@main
+github.com/storj/ci/check-copyright@main
+github.com/storj/ci/check-imports@main
+github.com/storj/ci/check-peer-constraints@main
+github.com/storj/ci/check-atomic-align@main
+github.com/storj/ci/check-monkit@main
+github.com/storj/ci/check-errs@main
+github.com/storj/ci/check-monitoring@main
