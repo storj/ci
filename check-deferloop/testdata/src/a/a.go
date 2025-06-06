@@ -5,12 +5,12 @@ package a
 
 func _() {
 	for {
-		defer func() {}() // want "defer inside a loop"
+		defer func() {}() //nolint go-critic, // want "defer inside a loop"
 	}
 }
 func _() {
 	for {
-		defer func() { // want "defer inside a loop"
+		defer func() { //nolint go-critic, // want "defer inside a loop"
 			defer func() {}()
 		}()
 	}
@@ -45,7 +45,7 @@ func _() {
 func _() {
 	for {
 		if true {
-			defer func() {}()
+			defer func() {}() //nolint go-critic, this is fine
 			return
 		}
 	}
