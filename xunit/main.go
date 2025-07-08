@@ -31,7 +31,10 @@ func main() {
 	stdin := io.TeeReader(os.Stdin, &buffer)
 
 	pkgs, err := parse.Process(stdin, parse.WithFollowOutput(true))
-	errcode := pkgs.ExitCode()
+	errcode := 0
+	if pkgs != nil {
+		errcode = pkgs.ExitCode()
+	}
 	if err != nil {
 		if errors.Is(err, parse.ErrNotParsable) {
 			_, _ = fmt.Fprintf(os.Stderr, "tparse error: no parseable events: call go test with -json flag\n\n")
@@ -61,6 +64,10 @@ func main() {
 
 	encoder.EncodeToken(xml.StartElement{Name: xml.Name{Local: "testsuites"}, Attr: nil})
 	defer encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: "testsuites"}})
+
+	if pkgs == nil {
+		return
+	}
 
 	for _, pkg := range pkgs.Packages {
 		failed := TestsByAction(pkg, parse.ActionFail)
