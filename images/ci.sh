@@ -1,7 +1,15 @@
 set -xeuo pipefail
 
+# AWS CLI v2.22.35 is the latest version we support currently.
+# This should be unpegged once https://github.com/storj/gateway-st/issues/89 is solved.
+curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.22.35.zip -o awscliv2.zip
+unzip awscliv2.zip
+./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli
+rm awscliv2.zip
+rm -r ./aws
+
 ## Tools for gateway testing
-apt-get install -y s3fs awscli
+apt-get install -y s3fs
 # Duplicity backup tool for S3 gateway test scenarios
 apt-get install -y duplicity python3-pip python3-boto3
 # Tool for running github.com/ceph/s3-tests for gateway
