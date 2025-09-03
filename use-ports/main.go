@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net"
@@ -24,7 +25,8 @@ func main() {
 	var listeners []net.Listener
 	var unableToStart []int
 	for port := *fromPort; port < *toPort; port++ {
-		listener, err := net.Listen("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
+		var listenConfig net.ListenConfig
+		listener, err := listenConfig.Listen(context.Background(), "tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
 		if err != nil {
 			unableToStart = append(unableToStart, port)
 			continue

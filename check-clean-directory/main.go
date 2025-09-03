@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -13,7 +14,7 @@ import (
 )
 
 func main() {
-	cmd := exec.Command("git", "ls-files", ".", "--others", "--exclude-standard")
+	cmd := exec.CommandContext(context.Background(), "git", "ls-files", ".", "--others", "--exclude-standard")
 
 	var stdout bytes.Buffer
 	cmd.Stdout = io.MultiWriter(&stdout, os.Stdout)

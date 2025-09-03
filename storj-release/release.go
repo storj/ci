@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -130,7 +131,7 @@ func getGoEnv(name string) (string, error) {
 		return env, nil
 	}
 
-	value, err := exec.Command("go", "env", name).CombinedOutput()
+	value, err := exec.CommandContext(context.Background(), "go", "env", name).CombinedOutput()
 	if err != nil {
 		return "", err
 	}
@@ -140,7 +141,7 @@ func getGoEnv(name string) (string, error) {
 
 // FetchVersionInfo gets the version information from the git tag.
 func (env *Env) FetchVersionInfo() error {
-	out, err := exec.Command("git", "describe", "--tags", "--exact-match", "--match", `v[0-9]*.[0-9]*.[0-9]*`).CombinedOutput()
+	out, err := exec.CommandContext(context.Background(), "git", "describe", "--tags", "--exact-match", "--match", `v[0-9]*.[0-9]*.[0-9]*`).CombinedOutput()
 	env.Log.Printf("git describe tags output: %v", string(out))
 	if err != nil {
 		env.Log.Printf("failed to get git tag for last commit: %v", string(out))
@@ -152,7 +153,7 @@ func (env *Env) FetchVersionInfo() error {
 		return fmt.Errorf("failed to parse %q: %w", string(out), err)
 	}
 
-	out, err = exec.Command("git", "rev-parse", "--short", "HEAD").CombinedOutput()
+	out, err = exec.CommandContext(context.Background(), "git", "rev-parse", "--short", "HEAD").CombinedOutput()
 	env.Log.Printf("git reverse parse output: %v", string(out))
 	if err != nil {
 		return fmt.Errorf("failed to get git commit hash: %w", err)
@@ -291,7 +292,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 			versionInfoTemplate,
 		)
 
-		out, err := exec.Command("goversioninfo", args...).CombinedOutput()
+		out, err := exec.CommandContext(context.Background(), "goversioninfo", args...).CombinedOutput()
 		env.Log.Println("goversioninfo: ", string(out))
 		if err != nil {
 			return fmt.Errorf("failed to run goversioninfo: %w", err)
@@ -343,7 +344,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 
 	runArgs = append(runArgs, buildArgs...)
 
-	cmd := exec.Command("docker", runArgs...)
+	cmd := exec.CommandContext(context.Background(), "docker", runArgs...)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("build failed: %w", err)
@@ -358,7 +359,7 @@ func (env *Env) BuildComponentBinary(tagdir, component string, osarch OsArch) er
 		if err != nil {
 			env.Log.Printf("skipping signing because storj-sign is missing: %v", err)
 		} else {
-			out, err := exec.Command(signer, binaryPath).CombinedOutput()
+			out, err := exec.CommandContext(context.Background(), signer, binaryPath).CombinedOutput()
 			env.Log.Printf("storj-sign: %v", string(out))
 			if err != nil {
 				return fmt.Errorf("failed to sign %q: %w", binaryPath, err)

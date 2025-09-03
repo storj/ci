@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -124,7 +125,7 @@ func tryCompile(tags, compiler, platform string, packages []string) result {
 	args = append(args, "errors") // add a non-binary package to prevent creating binaries
 	args = append(args, packages...)
 
-	cmd := exec.Command(compiler, args...)
+	cmd := exec.CommandContext(context.Background(), compiler, args...)
 	cmd.Env = append(os.Environ(),
 		"GOOS="+goos,
 		"GOARCH="+goarch,

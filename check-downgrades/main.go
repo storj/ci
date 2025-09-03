@@ -6,6 +6,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -187,7 +188,7 @@ func check(olddir, newdir, modfile string, allowlist map[string]struct{}) (probl
 }
 
 func execute(dir, bin string, args ...string) ([]byte, error) {
-	cmd := exec.Command(bin, args...)
+	cmd := exec.CommandContext(context.Background(), bin, args...)
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
 	if err != nil {

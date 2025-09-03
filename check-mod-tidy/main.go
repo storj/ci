@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -66,7 +67,7 @@ func check() (err error) {
 }
 
 func tidy(rootDir string) (err error) {
-	modFiles, err := exec.Command("git", "ls-files", "go.mod", "**/go.mod").Output()
+	modFiles, err := exec.CommandContext(context.Background(), "git", "ls-files", "go.mod", "**/go.mod").Output()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "finding go.mod files failed: %v", err)
 		return err
@@ -78,7 +79,7 @@ func tidy(rootDir string) (err error) {
 			continue
 		}
 
-		cmd := exec.Command("go", "mod", "tidy")
+		cmd := exec.CommandContext(context.Background(), "go", "mod", "tidy")
 		cmd.Dir = filepath.Join(rootDir, filepath.Dir(modfile))
 		cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 
@@ -92,21 +93,21 @@ func tidy(rootDir string) (err error) {
 }
 
 func worktreeAdd(dst string) (err error) {
-	cmd := exec.Command("git", "worktree", "add", "--detach", dst)
+	cmd := exec.CommandContext(context.Background(), "git", "worktree", "add", "--detach", dst)
 	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 
 	return cmd.Run()
 }
 
 func worktreeRemove(dst string) (err error) {
-	cmd := exec.Command("git", "worktree", "remove", "--force", dst)
+	cmd := exec.CommandContext(context.Background(), "git", "worktree", "remove", "--force", dst)
 	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 
 	return cmd.Run()
 }
 
 func diff() (err error) {
-	cmd := exec.Command("git", "diff", "--exit-code", "go.mod", "go.sum", "**/go.mod", "**/go.sum")
+	cmd := exec.CommandContext(context.Background(), "git", "diff", "--exit-code", "go.mod", "go.sum", "**/go.mod", "**/go.sum")
 	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 
 	return cmd.Run()

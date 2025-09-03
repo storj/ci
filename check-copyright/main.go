@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -33,7 +34,7 @@ var Fix = flag.Bool("fix", false, "Fix violations, if possible")
 
 func main() {
 	flag.Parse()
-	cmd := exec.Command("git", "ls-files")
+	cmd := exec.CommandContext(context.Background(), "git", "ls-files")
 	out, err := cmd.Output()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "running \"git ls-files\" failed:\n")

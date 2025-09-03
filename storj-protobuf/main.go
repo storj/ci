@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -76,7 +77,7 @@ func installGoBin() error {
 		return nil
 	}
 
-	cmd := exec.Command("go", "get", "-u", "github.com/myitcv/gobin")
+	cmd := exec.CommandContext(context.Background(), "go", "get", "-u", "github.com/myitcv/gobin")
 	fmt.Println(strings.Join(cmd.Args, " "))
 	cmd.Env = append(os.Environ(), "GO111MODULE=off")
 
@@ -88,7 +89,7 @@ func installGoBin() error {
 }
 
 func install(deps ...string) error {
-	cmd := exec.Command("gobin", deps...)
+	cmd := exec.CommandContext(context.Background(), "gobin", deps...)
 	fmt.Println(strings.Join(cmd.Args, " "))
 
 	out, err := cmd.CombinedOutput()
@@ -101,7 +102,7 @@ func install(deps ...string) error {
 func generate(dir string, dirs []string, files []string) error {
 	defer switchdir(dir)()
 
-	cmd := exec.Command("protolock", "status")
+	cmd := exec.CommandContext(context.Background(), "protolock", "status")
 	local, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -118,7 +119,7 @@ func generate(dir string, dirs []string, files []string) error {
 	args := []string{"--drpc_out=plugins=grpc+drpc:.", "--lint_out=."}
 	args = appendCommonArguments(args, dir, dirs, files)
 
-	cmd = exec.Command(*protoc, args...)
+	cmd = exec.CommandContext(context.Background(), *protoc, args...)
 	fmt.Println(strings.Join(cmd.Args, " "))
 	out, err = cmd.CombinedOutput()
 	if len(out) > 0 {
@@ -163,7 +164,7 @@ func lint(dir string, dirs []string, files []string) error {
 	args := []string{"--lint_out=."}
 	args = appendCommonArguments(args, dir, dirs, files)
 
-	cmd := exec.Command(*protoc, args...)
+	cmd := exec.CommandContext(context.Background(), *protoc, args...)
 	fmt.Println(strings.Join(cmd.Args, " "))
 	out, err := cmd.CombinedOutput()
 	if len(out) > 0 {
@@ -200,7 +201,7 @@ func checklock(dir string, dirs []string, files []string) error {
 		return fmt.Errorf("unable to read proto.lock: %w", err)
 	}
 
-	cmd := exec.Command("protolock", "commit", "-lockdir", tmpdir)
+	cmd := exec.CommandContext(context.Background(), "protolock", "commit", "-lockdir", tmpdir)
 	cmd.Dir = protolockdir
 	out, err := cmd.CombinedOutput()
 	if len(out) > 0 {
@@ -322,7 +323,7 @@ func diff(b1, b2 []byte) (data []byte, err error) {
 	}
 	defer func() { _ = os.Remove(f2) }()
 
-	data, err = exec.Command("diff", "-u", f1, f2).CombinedOutput()
+	data, err = exec.CommandContext(context.Background(), "diff", "-u", f1, f2).CombinedOutput()
 	if len(data) > 0 {
 		// diff exits with a non-zero status when the files don't match.
 		// Ignore that failure as long as we get output.
