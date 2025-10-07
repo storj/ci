@@ -24,7 +24,7 @@ mv "${DUPLICATI_NAME}" /usr/local/duplicati
 ln -s /usr/local/duplicati/duplicati-cli /usr/local/bin/duplicati-cli
 
 # Requirements for UI tests
-npm install @playwright/test@next # TODO use v1.55.0 once it's released
+npm install @playwright/test@v1.56.0
 npx playwright install --with-deps
 
 # Install Zig for cross-compiling
