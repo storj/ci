@@ -41,7 +41,7 @@ func TriggeredByComment(ctx context.Context, log *zap.Logger, jc Client, gc gerr
 		}
 	} else {
 		// all other comments including new reviews: check current state and trigger if build is required
-		return TriggeredByAnyChange(ctx, log, jc, gc, config, changeID, comment)
+		return TriggeredByAnyChange(ctx, log, jc, gc, config, changeID, commit)
 	}
 
 	if change.Private && config.Jenkins != "private" {
