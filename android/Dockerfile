@@ -1,4 +1,4 @@
-FROM golang:1.24.3
+FROM golang:1.24.11
 
 # Disable safe.directory https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory,
 # because we are running in containerized environment anyways.
