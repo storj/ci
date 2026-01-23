@@ -17,6 +17,10 @@ node('node') {
     stage('Build and push images') {
       lastStage = env.STAGE_NAME
 
+      env.DOCKER_BUILDKIT = '1'
+      env.BUILDX_BUILDER = 'multiplatform-builder'
+      sh 'docker buildx create --name $BUILDX_BUILDER --driver docker-container --bootstrap --use || docker buildx use $BUILDX_BUILDER'
+
       timeout(time: 2, unit: 'HOURS') {
         sh 'make build-and-push-images'
       }
@@ -41,6 +45,7 @@ node('node') {
   }
   finally {
     stage('Cleanup') {
+      sh script: '[ -n "$BUILDX_BUILDER" ] && docker buildx rm --keep-state $BUILDX_BUILDER || true', returnStatus: true
       sh script: 'make clean', returnStatus: true
       deleteDir()
     }
