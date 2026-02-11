@@ -1,5 +1,5 @@
 # tools image that we can cache
-FROM golang:1.25.5 AS tools
+FROM golang:1.26.0 AS tools
 
 WORKDIR /go/ci
 
@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     go install ./...
 
-FROM golang:1.25.5 AS linters
+FROM golang:1.26.0 AS linters
 # Linters, formatters, build tools
 ENV PATH=$PATH:/go/bin
 COPY ./images/tools /go/tools
@@ -16,13 +16,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     bash -c 'cat /go/tools | xargs -n1 go install'
 
-FROM golang:1.25.5 AS rclone
+FROM golang:1.26.0 AS rclone
 RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     go install github.com/rclone/rclone@v1.65.0 && \
     go install github.com/rclone/rclone/fstest/test_all@v1.65.0
 
-FROM golang:1.25.5 AS ci-slim
+FROM golang:1.26.0 AS ci-slim
 
 WORKDIR /go/ci
 
