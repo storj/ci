@@ -39,10 +39,10 @@ RUN go install golang.org/dl/go1.17.13@latest && \
     go1.17.13 download
 
 # minimum version supported by our packages.
-RUN go install golang.org/dl/go1.24.7@latest && \
-    mv $(go env GOPATH)/bin/go1.24.7 $(go env GOPATH)/bin/go.min && \
+RUN go install golang.org/dl/go1.25.7@latest && \
+    mv $(go env GOPATH)/bin/go1.25.7 $(go env GOPATH)/bin/go.min && \
     go.min download && \
-    rm /root/sdk/go1.24.7/*.tar.gz
+    rm /root/sdk/go1.25.7/*.tar.gz
 
 FROM ci-slim AS ci
 
