@@ -7,3 +7,4 @@ github.com/storj/ci/check-monkit@main
 github.com/storj/ci/check-errs@main
 github.com/storj/ci/check-monitoring@main
 github.com/storj/ci/check-zap-fields@main
+github.com/storj/ci/check-retry@main
