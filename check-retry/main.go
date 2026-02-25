@@ -215,10 +215,11 @@ func findModifiedOuterVars(pass *analysis.Pass, fn *ast.FuncLit, paramVars map[t
 	ast.Inspect(fn.Body, func(n ast.Node) bool {
 		switch n := n.(type) {
 		case *ast.FuncLit:
-			// Don't descend into nested function literals - they have their own scope.
-			if n != fn {
-				return false
-			}
+			// Skip the root callback node itself (we're already inside it).
+			// Do descend into nested function literals — closures can
+			// still modify variables from the retry callback's outer scope,
+			// and those modifications need to be reset too.
+			return true
 		case *ast.AssignStmt:
 			for _, lhs := range n.Lhs {
 				if obj := outerVar(pass, fn, lhs, paramVars); obj != nil {

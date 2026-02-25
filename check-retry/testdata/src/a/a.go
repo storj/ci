@@ -482,7 +482,68 @@ func goodDeleteWithReset() {
 	_ = m
 }
 
+// --- Bad: modification inside nested closure without reset ---
+
+func badNestedClosureAppend() {
+	r := Retrier{}
+	var items []int
+	r.ReadWriteTransactionWithOptions(func(tx int) error {
+		forEach(func() {
+			items = append(items, tx) // want `variable "items" is modified inside retry callback but not reset at the top of the callback`
+		})
+		return nil
+	}, Options{})
+	_ = items
+}
+
+func badNestedClosureIncrement() {
+	var count int
+	WithRetry(func() {
+		forEach(func() {
+			count++ // want `variable "count" is modified inside retry callback but not reset at the top of the callback`
+		})
+	})
+	_ = count
+}
+
+func badNestedClosureAssign() {
+	var result int
+	WithRetry(func() {
+		forEach(func() {
+			result = doWork() // want `variable "result" is modified inside retry callback but not reset at the top of the callback`
+		})
+	})
+	_ = result
+}
+
+// Good: nested closure modification with proper reset at top.
+
+func goodNestedClosureWithReset() {
+	var items []int
+	WithRetry(func() {
+		items = []int{}
+		forEach(func() {
+			items = append(items, 1)
+		})
+	})
+	_ = items
+}
+
+// Good: modification of nested closure's own parameter.
+
+func goodNestedClosureParam() {
+	WithRetry(func() {
+		forEachInt(func(x int) {
+			x++
+			_ = x
+		})
+	})
+}
+
 // --- Helpers ---
+
+func forEach(fn func())    { fn() }
+func forEachInt(fn func(int)) { fn(0) }
 
 func doWork() int                                                          { return 1 }
 func notRetry(fn func())                                                   { fn() }
