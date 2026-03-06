@@ -1,5 +1,5 @@
 # tools image that we can cache
-FROM golang:1.26.0 AS tools
+FROM golang:1.26.1 AS tools
 
 WORKDIR /go/ci
 
@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     go install ./...
 
-FROM golang:1.26.0 AS linters
+FROM golang:1.26.1 AS linters
 # Linters, formatters, build tools
 ENV PATH=$PATH:/go/bin
 COPY ./images/tools /go/tools
@@ -16,13 +16,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     bash -c 'cat /go/tools | xargs -n1 go install'
 
-FROM golang:1.26.0 AS rclone
+FROM golang:1.26.1 AS rclone
 RUN --mount=type=cache,target=/root/.cache/go-build,id=gobuild \
     --mount=type=cache,target=/go/pkg/mod,id=gopkg \
     go install github.com/rclone/rclone@v1.65.0 && \
     go install github.com/rclone/rclone/fstest/test_all@v1.65.0
 
-FROM golang:1.26.0 AS ci-slim
+FROM golang:1.26.1 AS ci-slim
 
 WORKDIR /go/ci
 
@@ -39,10 +39,10 @@ RUN go install golang.org/dl/go1.17.13@latest && \
     go1.17.13 download
 
 # minimum version supported by our packages.
-RUN go install golang.org/dl/go1.25.7@latest && \
-    mv $(go env GOPATH)/bin/go1.25.7 $(go env GOPATH)/bin/go.min && \
+RUN go install golang.org/dl/go1.25.8@latest && \
+    mv $(go env GOPATH)/bin/go1.25.8 $(go env GOPATH)/bin/go.min && \
     go.min download && \
-    rm /root/sdk/go1.25.7/*.tar.gz
+    rm /root/sdk/go1.25.8/*.tar.gz
 
 FROM ci-slim AS ci
 
