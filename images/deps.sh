@@ -30,10 +30,10 @@ echo 'max_connections = 1000' >> /etc/postgresql/17/main/conf.d/connectionlimits
 echo 'fsync = off' >> /etc/postgresql/17/main/conf.d/nosync.conf
 
 # Google Cloud Spanner Emulator binaries
-SPANNER_VERSION=1.5.42
+SPANNER_VERSION=1.5.51
 SPANNER_ARCH=amd64
 curl -0 https://storage.googleapis.com/cloud-spanner-emulator/releases/${SPANNER_VERSION}/cloud-spanner-emulator_linux_${SPANNER_ARCH}-${SPANNER_VERSION}.tar.gz -o cloud-spanner-emulator.tar.gz
-echo "c7255193c2f0e6e187f18fb7120b666584059315e32bdc37e4fa90563bed6259 *cloud-spanner-emulator.tar.gz" | sha256sum --check
+echo "1261de8a9473e668d41867b8ee0522bbd779fe64a5ce5e185def5da359409d0a *cloud-spanner-emulator.tar.gz" | sha256sum --check
 tar xvf cloud-spanner-emulator.tar.gz
 chmod u+x gateway_main emulator_main
 mv gateway_main /usr/local/bin/spanner_gateway
