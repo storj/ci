@@ -39,3 +39,9 @@ chmod u+x gateway_main emulator_main
 mv gateway_main /usr/local/bin/spanner_gateway
 mv emulator_main /usr/local/bin/spanner_emulator
 rm cloud-spanner-emulator.tar.gz
+
+# TiDB local test cluster helper
+TIDB_VERSION=v8.5.6
+curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh
+ln -s ~/.tiup/bin/tiup /usr/local/bin/tiup
+tiup install tidb:${TIDB_VERSION} tikv:${TIDB_VERSION} pd:${TIDB_VERSION}
