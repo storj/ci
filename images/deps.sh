@@ -44,4 +44,9 @@ rm cloud-spanner-emulator.tar.gz
 TIDB_VERSION=v8.5.6
 curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh
 ln -s ~/.tiup/bin/tiup /usr/local/bin/tiup
-tiup install tidb:${TIDB_VERSION} tikv:${TIDB_VERSION} pd:${TIDB_VERSION}
+PLAYGROUND_VERSION=v1.16.5
+tiup install playground:${PLAYGROUND_VERSION} \
+    tidb:${TIDB_VERSION} \
+    tikv:${TIDB_VERSION} \
+    pd:${TIDB_VERSION} \
+    tiflash:${TIDB_VERSION}
