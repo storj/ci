@@ -169,9 +169,9 @@ func jenkinsInstances() map[string]jenkins.ClientConfig {
 	res := make(map[string]jenkins.ClientConfig)
 	for k, v := range viper.GetStringMap("jenkins") {
 		res[k] = jenkins.ClientConfig{
-			URL:   v.(map[string]interface{})["url"].(string),
-			User:  v.(map[string]interface{})["user"].(string),
-			Token: v.(map[string]interface{})["token"].(string),
+			URL:   v.(map[string]any)["url"].(string),
+			User:  v.(map[string]any)["user"].(string),
+			Token: v.(map[string]any)["token"].(string),
 		}
 	}
 	return res
@@ -191,7 +191,7 @@ func ReadTriggerConfig(ctx context.Context, log *zap.Logger, gr gerrit.Client, p
 	}
 	content = string(decoded)
 	var ourSection bool
-	for _, line := range strings.Split(content, "\n") {
+	for line := range strings.SplitSeq(content, "\n") {
 		if strings.HasPrefix(line, "[storj-trigger") {
 			ourSection = true
 			continue
@@ -229,7 +229,7 @@ func readArgFile(fileName string) (argMap map[string]string, action string, err 
 	action = ""
 	key := ""
 	value := ""
-	for _, line := range strings.Split(string(content), "\n") {
+	for line := range strings.SplitSeq(string(content), "\n") {
 		line = strings.TrimSpace(line)
 		if action == "" {
 			action = path.Base(line)

@@ -34,7 +34,7 @@ func NewClient(log *zap.Logger, baseurl, user, token string) Client {
 	}
 }
 
-func (g *Client) doAPICall(ctx context.Context, url string, request interface{}) ([]byte, error) {
+func (g *Client) doAPICall(ctx context.Context, url string, request any) ([]byte, error) {
 	var requestBody io.Reader
 	method := "GET"
 	if request != nil {
@@ -72,7 +72,7 @@ func (g *Client) doAPICall(ctx context.Context, url string, request interface{})
 	return body, nil
 }
 
-func (g *Client) doJsonAPICall(ctx context.Context, url string, request interface{}, result interface{}) error {
+func (g *Client) doJsonAPICall(ctx context.Context, url string, request any, result any) error {
 	body, err := g.doAPICall(ctx, url, request)
 	if err != nil {
 		return errs.Wrap(err)

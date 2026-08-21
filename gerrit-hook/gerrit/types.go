@@ -14,27 +14,27 @@ type Changes []Change
 
 // Change is a descriptor for a gerrit patch.
 type Change struct {
-	Number           int           `json:"_number"`
-	AttentionSet     struct{}      `json:"attention_set"`
-	Branch           string        `json:"branch"`
-	ChangeID         string        `json:"change_id"`
-	Created          string        `json:"created"`
-	Deletions        int           `json:"deletions"`
-	HasReviewStarted bool          `json:"has_review_started"`
-	Hashtags         []interface{} `json:"hashtags"`
-	ID               string        `json:"id"`
-	Insertions       int           `json:"insertions"`
-	Mergeable        bool          `json:"mergeable"`
-	MetaRevID        string        `json:"meta_rev_id"`
-	WorkInProgress   bool          `json:"work_in_progress"`
-	Private          bool          `json:"is_private"`
+	Number           int      `json:"_number"`
+	AttentionSet     struct{} `json:"attention_set"`
+	Branch           string   `json:"branch"`
+	ChangeID         string   `json:"change_id"`
+	Created          string   `json:"created"`
+	Deletions        int      `json:"deletions"`
+	HasReviewStarted bool     `json:"has_review_started"`
+	Hashtags         []any    `json:"hashtags"`
+	ID               string   `json:"id"`
+	Insertions       int      `json:"insertions"`
+	Mergeable        bool     `json:"mergeable"`
+	MetaRevID        string   `json:"meta_rev_id"`
+	WorkInProgress   bool     `json:"work_in_progress"`
+	Private          bool     `json:"is_private"`
 	Owner            struct {
 		AccountID int `json:"_account_id"`
 	} `json:"owner"`
-	Project      string        `json:"project"`
-	Requirements []interface{} `json:"requirements"`
-	Status       string        `json:"status"`
-	Subject      string        `json:"subject"`
+	Project      string `json:"project"`
+	Requirements []any  `json:"requirements"`
+	Status       string `json:"status"`
+	Subject      string `json:"subject"`
 	Revisions    map[string]struct {
 		Number  int    `json:"_number"`
 		Created string `json:"created"`
@@ -54,7 +54,7 @@ type Change struct {
 		Labels []struct {
 			AppliedBy struct {
 				AccountID int `json:"_account_id"`
-			} `json:"applied_by,omitempty"`
+			} `json:"applied_by"`
 			Label  string `json:"label"`
 			Status string `json:"status"`
 		} `json:"labels"`

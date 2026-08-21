@@ -73,7 +73,7 @@ func tidy(rootDir string) (err error) {
 		return err
 	}
 
-	for _, modfile := range strings.Split(string(modFiles), "\n") {
+	for modfile := range strings.SplitSeq(string(modFiles), "\n") {
 		modfile = strings.TrimSpace(modfile)
 		if modfile == "" {
 			continue

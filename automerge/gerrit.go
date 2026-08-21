@@ -71,7 +71,7 @@ func (c *Client) Submit(ctx context.Context, ci *ChangeInfo) error {
 	return c.query(ctx, "POST", ci.actionURL("submit"), nil)
 }
 
-func (c *Client) query(ctx context.Context, method, endpoint string, into interface{}) error {
+func (c *Client) query(ctx context.Context, method, endpoint string, into any) error {
 	if c.dry && method == "POST" {
 		return nil
 	}

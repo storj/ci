@@ -43,8 +43,8 @@ func main() {
 	}
 
 	var failed int
-	committedFiles := strings.Split(string(out), "\n")
-	for _, path := range committedFiles {
+	committedFiles := strings.SplitSeq(string(out), "\n")
+	for path := range committedFiles {
 		if path == "" {
 			continue
 		}
@@ -83,7 +83,7 @@ func fixCopyright(path string) error {
 	}
 	switch filepath.Ext(path) {
 	case ".go", ".ts", ".js", ".vue":
-		f = append([]byte(fmt.Sprintf("// Copyright (C) %d Storj Labs, Inc.\n// See LICENSE for copying information.\n\n", time.Now().Year())), f...)
+		f = append(fmt.Appendf(nil, "// Copyright (C) %d Storj Labs, Inc.\n// See LICENSE for copying information.\n\n", time.Now().Year()), f...)
 	default:
 		fmt.Fprintf(os.Stderr, "WARNING: copyright fix is not supported for file type: %s", path)
 	}

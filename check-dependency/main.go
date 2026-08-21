@@ -23,7 +23,7 @@ func (ss *Strings) String() string {
 
 // Set sets the value.
 func (ss *Strings) Set(v string) error {
-	for _, v := range strings.Split(v, ";") {
+	for v := range strings.SplitSeq(v, ";") {
 		v = strings.TrimSpace(v)
 		if v == "" {
 			continue

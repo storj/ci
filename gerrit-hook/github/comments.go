@@ -82,7 +82,7 @@ type githubRef struct {
 func findGithubRefs(message string) (refs []githubRef) {
 	issuePattern := regexp.MustCompile(`([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)?#(\d+)`)
 	urlPattern := regexp.MustCompile(`https://github.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)/(?:pull|issues)/(\d+)`)
-	for _, line := range strings.Split(message, "\n") {
+	for line := range strings.SplitSeq(message, "\n") {
 		matches := issuePattern.FindStringSubmatch(line)
 		if matches != nil {
 			refs = append(refs, githubRef{repo: matches[1], issue: matches[2]})

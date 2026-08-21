@@ -83,7 +83,7 @@ func mergedRetryFuncNames() map[string]bool {
 			retryFuncNames[name] = true
 		}
 		if extraFuncs != "" {
-			for _, name := range strings.Split(extraFuncs, ",") {
+			for name := range strings.SplitSeq(extraFuncs, ",") {
 				name = strings.TrimSpace(name)
 				if name != "" {
 					retryFuncNames[name] = true

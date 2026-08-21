@@ -190,7 +190,7 @@ func (env *Env) BuildComponents(components []string) error {
 
 	skippedOsArches := make(map[string]struct{})
 
-	for _, s := range strings.Split(skipOsArches, ",") {
+	for s := range strings.SplitSeq(skipOsArches, ",") {
 		skippedOsArches[s] = struct{}{}
 	}
 
@@ -207,7 +207,7 @@ func (env *Env) BuildComponents(components []string) error {
 func (env *Env) BuildComponent(tagdir, component string, skippedOsArches map[string]struct{}) error {
 	var osarches []OsArch
 	if osArches != "" {
-		for _, v := range strings.Split(osArches, ",") {
+		for v := range strings.SplitSeq(osArches, ",") {
 			split := strings.Split(v, "/")
 			if len(split) != 2 {
 				return fmt.Errorf("wrong format for os/arch: %s", v)

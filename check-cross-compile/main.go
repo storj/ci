@@ -46,9 +46,7 @@ func main() {
 
 	lim := newLimiter(parallel)
 	for i, compiler := range compilers {
-		i, compiler := i, compiler
 		for k, platform := range platforms {
-			k, platform := k, platform
 			ri := i*len(platforms) + k
 			results[ri] = make(chan result, 1)
 			lim.Go(func() {
@@ -82,7 +80,7 @@ func main() {
 
 func csv(vs string) []string {
 	xs := []string{}
-	for _, v := range strings.Split(vs, ",") {
+	for v := range strings.SplitSeq(vs, ",") {
 		v = strings.TrimSpace(v)
 		if v == "" {
 			continue

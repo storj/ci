@@ -33,8 +33,8 @@ func main() {
 	}
 
 	var failed int
-	committedFiles := strings.Split(string(out), "\n")
-	for _, path := range committedFiles {
+	committedFiles := strings.SplitSeq(string(out), "\n")
+	for path := range committedFiles {
 		if path == "" {
 			continue
 		}

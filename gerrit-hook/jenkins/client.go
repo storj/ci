@@ -56,7 +56,7 @@ func (c *Client) TriggerJob(ctx context.Context, instance string, job string, pa
 	return c.jenkinsHTTPCall(ctx, instance, triggerURL, nil)
 }
 
-func (c *Client) jenkinsHTTPCall(ctx context.Context, instance string, relURL string, result interface{}) error {
+func (c *Client) jenkinsHTTPCall(ctx context.Context, instance string, relURL string, result any) error {
 	jenkins, found := c.instances[instance]
 	if !found {
 		return errs.New("No such registered Jenkins instance: %s", instance)

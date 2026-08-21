@@ -30,7 +30,7 @@ var Analyzer = &analysis.Analyzer{
 var maxParams = flag.Int64("max-args", 64, "maximum allowed argument size in bytes")
 var maxResults = flag.Int64("max-results", 256, "maximum allowed results size in bytes")
 
-func run(pass *analysis.Pass) (interface{}, error) {
+func run(pass *analysis.Pass) (any, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
 		(*ast.FuncDecl)(nil),
