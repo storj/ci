@@ -23,3 +23,7 @@ curl -sfL https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/
 apt-get -y install shellcheck
 
 apt-get install -yq clang-format
+
+# Dagger CLI
+DAGGER_VERSION=0.21.8
+curl -sfL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin DAGGER_VERSION=$DAGGER_VERSION sh
