@@ -44,8 +44,9 @@ func run(pass *analysis.Pass) (any, error) {
 			return true
 		}
 
-		start := stack[len(stack)-2]
-		stop := stack[len(stack)-3]
+		start := ancestor(stack, 1)
+		stop := ancestor(stack, 2)
+		owner := ancestor(stack, 3)
 
 		if _, ok = start.(*ast.CallExpr); !ok {
 			if _, ok := start.(*ast.AssignStmt); ok {
@@ -65,7 +66,29 @@ func run(pass *analysis.Pass) (any, error) {
 			return true
 		}
 
+		// mon.Task()(&ctx)(&err) outside of a defer stops the task immediately,
+		// recording a zero duration and never seeing the returned error.
+		if _, ok := owner.(*ast.DeferStmt); !ok && owner != nil {
+			pass.Reportf(call.Lparen, "monitoring not deferred, stops immediately")
+		}
+
 		return true
 	})
 	return nil, nil
+}
+
+// ancestor returns the n-th ancestor of the node on top of the stack,
+// skipping parentheses. ancestor(stack, 0) is the node itself.
+// It returns nil when the stack does not go back that far.
+func ancestor(stack []ast.Node, n int) ast.Node {
+	for i := len(stack) - 1; i >= 0; i-- {
+		if _, ok := stack[i].(*ast.ParenExpr); ok {
+			continue
+		}
+		if n == 0 {
+			return stack[i]
+		}
+		n--
+	}
+	return nil
 }
