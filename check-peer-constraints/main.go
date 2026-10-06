@@ -47,7 +47,7 @@ func main() {
 	}
 
 	pkgs, err := packages.Load(&packages.Config{
-		Mode:       packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports,
+		Mode:       packages.NeedName | packages.NeedFiles | packages.NeedImports,
 		Env:        os.Environ(),
 		BuildFlags: buildFlags,
 		Tests:      false,
