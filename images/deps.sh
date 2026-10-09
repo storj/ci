@@ -29,17 +29,6 @@ echo 'host    all             all             ::0/0                   trust' >> 
 echo 'max_connections = 1000' >> /etc/postgresql/17/main/conf.d/connectionlimits.conf
 echo 'fsync = off' >> /etc/postgresql/17/main/conf.d/nosync.conf
 
-# Google Cloud Spanner Emulator binaries
-SPANNER_VERSION=1.5.52
-SPANNER_ARCH=amd64
-curl -0 https://storage.googleapis.com/cloud-spanner-emulator/releases/${SPANNER_VERSION}/cloud-spanner-emulator_linux_${SPANNER_ARCH}-${SPANNER_VERSION}.tar.gz -o cloud-spanner-emulator.tar.gz
-echo "1446d78d1d238c76b4e79c892b5a9a94355f24acbb3610ce848e0c55a13cc59a *cloud-spanner-emulator.tar.gz" | sha256sum --check
-tar xvf cloud-spanner-emulator.tar.gz
-chmod u+x gateway_main emulator_main
-mv gateway_main /usr/local/bin/spanner_gateway
-mv emulator_main /usr/local/bin/spanner_emulator
-rm cloud-spanner-emulator.tar.gz
-
 # TiDB local test cluster helper
 TIDB_VERSION=v8.5.6
 curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh

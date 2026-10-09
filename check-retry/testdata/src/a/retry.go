@@ -34,5 +34,5 @@ func (r *Retrier) CtxReadWriteTransactionWithOptions(ctx interface{}, fn func(ct
 // QueryResult simulates a query returning multiple values.
 func QueryResult(ctx interface{}, tx int, sql string) (int, error) { return tx, nil }
 
-// CollectRow simulates spannerutil.CollectRow.
+// CollectRow simulates a helper that collects a single row.
 func CollectRow(v int, err error) (int, error) { return v, err }
