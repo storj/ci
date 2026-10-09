@@ -29,6 +29,18 @@ echo 'host    all             all             ::0/0                   trust' >> 
 echo 'max_connections = 1000' >> /etc/postgresql/17/main/conf.d/connectionlimits.conf
 echo 'fsync = off' >> /etc/postgresql/17/main/conf.d/nosync.conf
 
+# Tests don't need durability, trade it for faster commits and DDL. None of
+# these change locking or transaction semantics. Autovacuum stays on, because
+# tests create and drop many schemas, which bloats the system catalogs.
+echo 'synchronous_commit = off' >> /etc/postgresql/17/main/conf.d/nosync.conf
+echo 'full_page_writes = off' >> /etc/postgresql/17/main/conf.d/nosync.conf
+echo 'wal_level = minimal' >> /etc/postgresql/17/main/conf.d/nosync.conf
+echo 'max_wal_senders = 0' >> /etc/postgresql/17/main/conf.d/nosync.conf
+echo 'max_wal_size = 4GB' >> /etc/postgresql/17/main/conf.d/nosync.conf
+echo 'checkpoint_timeout = 30min' >> /etc/postgresql/17/main/conf.d/nosync.conf
+# Larger buffers make dropping many tables slower, keep it moderate.
+echo 'shared_buffers = 512MB' >> /etc/postgresql/17/main/conf.d/memory.conf
+
 # TiDB local test cluster helper
 TIDB_VERSION=v8.5.6
 curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh
