@@ -45,7 +45,7 @@ echo 'shared_buffers = 512MB' >> /etc/postgresql/17/main/conf.d/memory.conf
 TIDB_VERSION=v8.5.6
 curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh
 ln -s ~/.tiup/bin/tiup /usr/local/bin/tiup
-PLAYGROUND_VERSION=v1.16.5
+PLAYGROUND_VERSION=v1.17.1
 tiup install playground:${PLAYGROUND_VERSION} \
     tidb:${TIDB_VERSION} \
     tikv:${TIDB_VERSION} \
